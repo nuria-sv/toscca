@@ -193,21 +193,21 @@ CCAtStat = function(cancor, A, B, C = 0, type = c("CC", "Wilks", "Roy")) {
 #' \item{cancor_all}{Call canonical correlations calculated for each sparsity levels.}
 SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6), silent = FALSE)
 {
-  if(ncol(Y) <= max(nonzeroY)) {
+  if(ncol(B) <= max(nonzero_b)) {
     message("At least one of the nonzero options for Y is not sparse. Changing to meet criteria")
-    nonzeroY = nonzeroY[nonzeroY < ncol(Y)]
+    nonzeroB = nonzero_b[nonzero_b < ncol(B)]
   }
 
-  if(ncol(X) <= max(nonzeroX)) {
+  if(ncol(A) <= max(nonzero_a)) {
     message("At least one of the nonzero options for X is not sparse. Changing to meet criteria")
-    nonzeroX = nonzeroX[nonzeroX < ncol(X)]
+    nonzero_a = nonzero_a[nonzero_a < ncol(A)]
   }
 
   #Create the matrix A
-  alpha = sapply(nonzeroX, function(x) c(alphaInit))
+  alpha = sapply(nonzero_a, function(x) c(alphaInit))
 
-  varTol1 = matrix(0, nrow = nrow(X), ncol = length(nonzeroX))
-  varTol2 = matrix(0, nrow = nrow(Y), ncol = length(nonzeroX))
+  varTol1 = matrix(0, nrow = nrow(A), ncol = length(nonzero_a))
+  varTol2 = matrix(0, nrow = nrow(A), ncol = length(nonzero_b))
   i = 0
   e = 10
   while (e > tol & i <= iter) {
@@ -218,13 +218,13 @@ SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6),
     if(i > 1) varTol2 = zeta
 
 
-    gamma =  X %*% alpha
+    gamma =  A %*% alpha
     dist = sqrt(colSums(gamma^2))
     gamma = sweep(gamma, 2, dist, "/")
 
-    beta = t(Y) %*% gamma
+    beta = t(B) %*% gamma
 
-    beta = apply(rbind(beta,nonzeroY), 2, function(x)
+    beta = apply(rbind(beta,nonzero_b), 2, function(x)
     {
       nonzero1 = x[length(x)]
       y = x[-length(x)]
@@ -234,13 +234,13 @@ SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6),
       sign(y) * tmp
     })
 
-    zeta = Y %*% beta
+    zeta = B %*% beta
     dist = sqrt(colSums(zeta^2))
     zeta = sweep(zeta, 2, dist, "/")
 
-    alpha = t(X) %*% zeta
+    alpha = t(A) %*% zeta
 
-    alpha = apply(rbind(alpha,nonzeroX), 2, function(x)
+    alpha = apply(rbind(alpha,nonzero_a), 2, function(x)
     {
       nonzero1 = x[length(x)]
       y = x[-length(x)]
