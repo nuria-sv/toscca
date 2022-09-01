@@ -182,13 +182,13 @@ CCAtStat = function(cancor, A, B, C = 0, type = c("CC", "Wilks", "Roy")) {
 #' @param alphaInit Character. Type initialisation for \deqn{\mathbf{\alpha}}.
 #' @param A,B Data matrices.
 #' @param nonzero_a,nonzero_b Numeric. Scalar or vector over the number of nonzeroes allowed for a correlation estimate.
-#' @param iter Numeric. \Maximum number of iterations. Default is 20.
+#' @param iter Numeric. Maximum number of iterations. Default is 20.
 #' @param tol Numeric. Tolerance threshold. Default is 10^6.
 #' @param silent Logical. If FALSE, a progress bar will appear on the console. Default is FALSE.
 #' @return a list with the following elements:
 #' \itemize{
-#' \item{alpha}{Canonical vector for matrix \mathbf{A}, for each combination of sparsity value specified.}
-#' \item{beta}{Canonical vector for matrix \mathbf{B}, for each combination of sparsity value specified.}
+#' \item{alpha}{Canonical vector for matrix \deqn{\mathbf{A}}, for each combination of sparsity value specified.}
+#' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' \item{cancor_all}{Call canonical correlations calculated for each sparsity levels.}
 SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6), silent = FALSE)
@@ -276,13 +276,13 @@ SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6),
 #' @param alphaInit Character. Type initialisation for \deqn{\mathbf{\alpha}}. Default is "eigen".
 #' @param A,B Data matrices.
 #' @param nonzero_a,nonzero_b Numeric. Scalar or vector over the number of nonzeroes allowed for a correlation estimate.
-#' @param iter Numeric. \Maximum number of iterations. Default is 20.
+#' @param iter Numeric. Maximum number of iterations. Default is 20.
 #' @param tol Numeric. Tolerance threshold. Default is 10^6.
 #' @param silent Logical. If FALSE, a progress bar will appear on the console. Default is FALSE.
 #' @return a list with the following elements:
 #' \itemize{
-#' \item{alpha}{Canonical vector for matrix \mathbf{A}, for each combination of sparsity value specified.}
-#' \item{beta}{Canonical vector for matrix \mathbf{B}, for each combination of sparsity value specified.}
+#' \item{alpha}{Canonical vector for matrix \deqn{\mathbf{A}}, for each combination of sparsity value specified.}
+#' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' \item{nonzero_a,nonzero_b}{Optimal nonzero values for each canonical vector.}
 KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 10, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, XTest_res = NULL, YTest_res = NULL) {
@@ -434,7 +434,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
 
 #' Sparse Canonical Correlation Analysis. Computation of CC via NIPALS with soft thresholding.
 #'
-#' @description This function performs CCA on matrices \mathbf{A} and \mathbf{B} via Non-Iterative PArtial Least Squares (NIPALS) algorithm
+#' @description This function performs CCA on matrices \deqn{\mathbf{A}} and \deqn{\mathbf{B}} via Non-Iterative PArtial Least Squares (NIPALS) algorithm
 #' imposing sparsity over a fixed number of variables especified.
 #' @param A,B Data matrices.
 #' @param nonzero_a,nonzero_b Numeric. Scalar or vector over the number of nonzeroes allowed for a correlation estimate.
@@ -449,8 +449,8 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
 #' @details For a exploratory analysis nonzero_a and nonzero_b can be vectors. The algorithm will then search for the best combination of sparsity choice nonzero_a and nonzero_b for each component.
 #' @return a list with the following elements:
 #' \itemize{
-#' \item{alpha}{Canonical vector for matrix \mathbf{A}, for each combination of sparsity value specified.}
-#' \item{beta}{Canonical vector for matrix \mathbf{B}, for each combination of sparsity value specified.}
+#' \item{alpha}{Canonical vector for matrix \deqn{\mathbf{A}}, for each combination of sparsity value specified.}
+#' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' @export
 MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alphaStart = "eigen", folds = 10, silent = FALSE, toPlot = TRUE, typeResid = "basic", combination = FALSE, parallel_logic = FALSE) {

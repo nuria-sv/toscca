@@ -22,7 +22,7 @@ SCCA(
 
 \item{nonzero_a, nonzero_b}{Numeric. Scalar or vector over the number of nonzeroes allowed for a correlation estimate.}
 
-\item{iter}{Numeric. \Maximum number of iterations. Default is 20.}
+\item{iter}{Numeric. Maximum number of iterations. Default is 20.}
 
 \item{tol}{Numeric. Tolerance threshold. Default is 10^6.}
 
@@ -31,8 +31,8 @@ SCCA(
 \value{
 a list with the following elements:
 \itemize{
-\item{alpha}{Canonical vector for matrix \mathbf{A}, for each combination of sparsity value specified.}
-\item{beta}{Canonical vector for matrix \mathbf{B}, for each combination of sparsity value specified.}
+\item{alpha}{Canonical vector for matrix \deqn{\mathbf{A}}, for each combination of sparsity value specified.}
+\item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 \item{cancor}{Max. canonical correlation estimate.}
 \item{cancor_all}{Call canonical correlations calculated for each sparsity levels.}
 }

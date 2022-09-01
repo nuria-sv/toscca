@@ -27,15 +27,15 @@ KFoldSCCA(
 
 \item{alphaInit}{Character. Type initialisation for \deqn{\mathbf{\alpha}}. Default is "eigen".}
 
-\item{iter}{Numeric. \Maximum number of iterations. Default is 20.}
+\item{iter}{Numeric. Maximum number of iterations. Default is 20.}
 
 \item{tol}{Numeric. Tolerance threshold. Default is 10^6.}
 }
 \value{
 a list with the following elements:
 \itemize{
-\item{alpha}{Canonical vector for matrix \mathbf{A}, for each combination of sparsity value specified.}
-\item{beta}{Canonical vector for matrix \mathbf{B}, for each combination of sparsity value specified.}
+\item{alpha}{Canonical vector for matrix \deqn{\mathbf{A}}, for each combination of sparsity value specified.}
+\item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 \item{cancor}{Max. canonical correlation estimate.}
 \item{nonzero_a,nonzero_b}{Optimal nonzero values for each canonical vector.}
 }

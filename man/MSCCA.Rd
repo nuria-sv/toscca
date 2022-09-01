@@ -43,12 +43,12 @@ MSCCA(
 \value{
 a list with the following elements:
 \itemize{
-\item{alpha}{Canonical vector for matrix \mathbf{A}, for each combination of sparsity value specified.}
-\item{beta}{Canonical vector for matrix \mathbf{B}, for each combination of sparsity value specified.}
+\item{alpha}{Canonical vector for matrix \deqn{\mathbf{A}}, for each combination of sparsity value specified.}
+\item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 \item{cancor}{Max. canonical correlation estimate.}
 }
 \description{
-This function performs CCA on matrices \mathbf{A} and \mathbf{B} via Non-Iterative PArtial Least Squares (NIPALS) algorithm
+This function performs CCA on matrices \deqn{\mathbf{A}} and \deqn{\mathbf{B}} via Non-Iterative PArtial Least Squares (NIPALS) algorithm
 imposing sparsity over a fixed number of variables especified.
 }
 \details{
