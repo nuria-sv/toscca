@@ -250,8 +250,8 @@ SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6),
       sign(y) * tmp
     })
 
-    if(length(nonzeroX) == 1) e = mean(abs(gamma - varTol1)) + mean(abs(zeta - varTol2))
-    if(length(nonzeroX) > 1) e = mean(colMeans(abs(gamma - varTol1))) + mean(colMeans(abs(zeta - varTol2)))
+    if(length(nonzero_a) == 1) e = mean(abs(gamma - varTol1)) + mean(abs(zeta - varTol2))
+    if(length(nonzero_a) > 1) e = mean(colMeans(abs(gamma - varTol1))) + mean(colMeans(abs(zeta - varTol2)))
 
     textSCCA = paste0(" Common convergence error: ", round(e, 5), " & Iterations: ", i)
     if(isFALSE(silent) & (e<= tol || i > iter)) cat(textSCCA, "\r")
