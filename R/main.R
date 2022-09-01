@@ -258,8 +258,6 @@ SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6),
 
   }
 
-  alpha = sapply(1:ncol(alpha), function(p) standardVar(alpha[,p], centre = FALSE, normalise = TRUE))
-  beta  = sapply(1:ncol(beta), function(q) standardVar(beta[,q], centre = FALSE, normalise = TRUE))
 
   #Return the CCA
   cancor_out = abs(sapply(1:ncol(gamma), function(j) cor(gamma[,j], zeta[,j])))
@@ -419,10 +417,12 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
 
   result     = SCCA(alphaInit = alphaInit, A = A, B = B, nonzero_a = nonzeroGrid[select, 1], nonzero_b = nonzeroGrid[select, 2], silent = silent)
 
+  alpha = sapply(1:K, function(p) standardVar(alpha[,p], centre = FALSE, normalise = TRUE))
+  beta  = sapply(1:K, function(q) standardVar(beta[,q], centre = FALSE, normalise = TRUE))
 
   resultSCCA = list(cancor = canCorPrint,
-                    alpha  = result$alpha,
-                    beta   = result$beta,
+                    alpha  = alpha,
+                    beta   = beta,
                     # alphaMat       = alphaMat,
                     # betaMat        = betaMat,
                     # position       = select,
