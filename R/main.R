@@ -419,8 +419,8 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
 
 
   resultSCCA = list(cancor = canCorPrint,
-                    alpha  = alpha,
-                    beta   = beta,
+                    alpha  = result$alpha,
+                    beta   = result$beta,
                     # alphaMat       = alphaMat,
                     # betaMat        = betaMat,
                     # position       = select,
