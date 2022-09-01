@@ -14,8 +14,8 @@ KFoldSCCA(
   parallel_logic = FALSE,
   silent = FALSE,
   toPlot = TRUE,
-  XTest_res = NULL,
-  YTest_res = NULL
+  ATest_res = NULL,
+  BTest_res = NULL
 )
 }
 \arguments{
