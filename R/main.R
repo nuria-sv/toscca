@@ -469,8 +469,8 @@ MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alphaStart = "eigen", folds 
     } else if(k > 1) {
 
 
-      Ea = residualisation(a = matrix(alphaComponents[, k - 1], nrow = ncol(Ea)),  mat = Ea, type = typeResid)
-      Eb = residualisation(a = matrix(betaComponents[, k - 1], nrow = ncol(Eb)),  mat = Eb, type = typeResid)
+      Ea = residualisation(vec = matrix(alphaComponents[, k - 1], nrow = ncol(Ea)),  mat = Ea, type = typeResid)
+      Eb = residualisation(vec = matrix(betaComponents[, k - 1], nrow = ncol(Eb)),  mat = Eb, type = typeResid)
 
       Ea = standardVar(Ea)
       Eb = standardVar(Eb)
@@ -652,7 +652,7 @@ boostrapCCA = function(A, B, nonzero_a, nonzero_b, cancor, folds = 10, n = 100, 
       ASample = A[s, ]
       BSample = B[s, ]
       data    = list(ASample, BSample)
-      t[i] = CCAtStat(KFoldSCCA(A, B, alphaStart = "eigen", gridInit = 1, nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)
+      t[i] = CCAtStat(KFoldSCCA(A, B, alphaStart = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)
 
     }
 
@@ -663,7 +663,7 @@ boostrapCCA = function(A, B, nonzero_a, nonzero_b, cancor, folds = 10, n = 100, 
       ASample = A[s, ]
       BSample = B[s, ]
       data    = list(ASample, ASample)
-      t[i] = CCAtStat(KFoldSCCA(A, B, alphaStart = "eigen", gridInit = 1, nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, XSample, Y, C = nuisanceVar, type = testStatType)
+      t[i] = CCAtStat(KFoldSCCA(A, B, alphaStart = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, XSample, Y, C = nuisanceVar, type = testStatType)
 
 
     }
