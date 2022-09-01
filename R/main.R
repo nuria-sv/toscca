@@ -390,8 +390,8 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
   if(isFALSE(silent)) print(canCorPrint)
   if(isFALSE(silent)) {
     cat("\n ........................................ \n",
-        paste0("# nonzero A: ", nonzeroGrid[select, 1],   "\n", "
-               # nonzero B: ", nonzeroGrid[select, 2],
+        paste0("# nonzero A: ", nonzeroGrid[select, 1],   "\n",
+               " # nonzero B: ", nonzeroGrid[select, 2],
                "\n ........................................ \n"))
   }
 
