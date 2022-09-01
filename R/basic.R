@@ -60,32 +60,35 @@ triangleArea = function(x, y, z = 0, type = c("rectangle")) { #assume a vertice 
 #' @param normalise Logical, if true, performs vector normalisation.
 #' @return A matrix or vector with the preferred standardarisation
 #' @export
+
 standardVar = function(mat, centre = TRUE, normalise = FALSE) {
   if(isFALSE(normalise)) {
     if(length(dim(mat)) == 2) {
       XMat = matrix(mat, nrow = nrow(mat), ncol = ncol(mat))
 
-    } else {
-      XMat = matrix(mat, nrow = length(mat), ncol = 1)
-
     }
+  } else {
+    XMat = matrix(mat, nrow = length(mat), ncol = 1)
 
-    if(centre) {
-      center <- colMeans(XMat, na.rm=TRUE)
-      XMat <- sweep(XMat, 2L, center)
-
-    }
-
-    dist.f = function(A) {
-      a = A[!is.na(A)]
-      a = sqrt(sum(a^2 / max(1, length(a) - 1L)))
-
-    }
-
-
-    dist = apply(XMat, 2L, dist.f)
-    Xstan = sweep(XMat, 2L, dist, "/")
   }
+
+  if(centre) {
+    center <- colMeans(XMat, na.rm=TRUE)
+    XMat <- sweep(XMat, 2L, center)
+
+  }
+
+  dist.f = function(A) {
+    a = A[!is.na(A)]
+    a = sqrt(sum(a^2 / max(1, length(a) - 1L)))
+
+  }
+
+
+  dist = apply(XMat, 2L, dist.f)
+  Xstan = sweep(XMat, 2L, dist, "/")
+}
+
 
   if(isTRUE(normalise)) {
     vec <- matrix(X, ncol = 1)
