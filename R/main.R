@@ -417,8 +417,6 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
 
   result     = SCCA(alphaInit = alphaInit, A = A, B = B, nonzero_a = nonzeroGrid[select, 1], nonzero_b = nonzeroGrid[select, 2], silent = silent)
 
-  alpha = sapply(1:K, function(p) standardVar(alpha[,p], centre = FALSE, normalise = TRUE))
-  beta  = sapply(1:K, function(q) standardVar(beta[,q], centre = FALSE, normalise = TRUE))
 
   resultSCCA = list(cancor = canCorPrint,
                     alpha  = alpha,
@@ -494,9 +492,13 @@ MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alphaStart = "eigen", folds 
   }
 
 
+  alpha = sapply(1:K, function(p) standardVar(alphaComponents[,p], centre = FALSE, normalise = TRUE))
+  beta  = sapply(1:K, function(q) standardVar(betaComponents[,q], centre = FALSE, normalise = TRUE))
+
+
   resultSCCA = list(cancor = cancorComponents,
-                    alpha  = alphaComponents,
-                    beta   = betaComponents
+                    alpha  = alpha,
+                    beta   = beta
   )
 
   return(resultSCCA)
