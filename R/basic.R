@@ -87,11 +87,10 @@ standardVar = function(mat, centre = TRUE, normalise = FALSE) {
 
   dist = apply(XMat, 2L, dist.f)
   Xstan = sweep(XMat, 2L, dist, "/")
-}
 
 
   if(isTRUE(normalise)) {
-    vec <- matrix(X, ncol = 1)
+    vec <- matrix(XMat, ncol = 1)
     a <- sqrt(sum(vec^2))
     if(a==0) a <- .05
     Xstan <-  matrix(vec/a, ncol=1)
