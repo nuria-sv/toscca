@@ -10,12 +10,12 @@ MSCCA(
   nonzero_a,
   nonzero_b,
   K = 1,
-  alphaStart = "eigen",
-  folds = 10,
+  alphaStart = c("eigen", "random", "uniform"),
+  folds = 1,
   silent = FALSE,
   toPlot = TRUE,
   typeResid = "basic",
-  combination = FALSE,
+  combination = TRUE,
   parallel_logic = FALSE
 )
 }

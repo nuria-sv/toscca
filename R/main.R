@@ -283,13 +283,14 @@ SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6),
 #' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' \item{nonzero_a,nonzero_b}{Optimal nonzero values for each canonical vector.}
-KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 10, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL) {
+KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = c("eigen", "random", "uniform"), folds = 1, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL) {
   N = nrow(A) # observations
   p = ncol(A) # predictor variables (not really since CCA is symmetric)
   q = ncol(B) # response variables (not really since CCA is symmetric)
   s = rep(1:folds, times=ceiling(N/folds))
   s = s[1:N]
   s = s[sample(1:length(s), length(s))]
+  if(folds == 1) s[sample(1:N, 0.25*N)] = 2
   nonzeroGrid = expand.grid(nonzero_a, nonzero_b)
   h = nrow(nonzeroGrid)
   canCor = matrix(NA, folds, h)
@@ -316,7 +317,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
         # check between selected vector vs. one with higher cancor or follow up
         if(alphaStart == "eigen") alphaInit = initialiseCanVar(A = ATrain, B = BTrain)[,1]
         if(alphaStart == "random") alphaInit = standardVar(replicate(1, rnorm(p)), normalise = TRUE)
-        if(alphaStart == "uniform") alphaInit = standardVar(matrix(rep(1, p), nrow = p, ncol = 1))
+        if(alphaStart == "uniform") alphaInit = standardVar(replicate(1, runif(p)), normalise = TRUE)
 
 
         if(isFALSE(silent)) progressBar(folds, f)
@@ -354,7 +355,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
       # check between selected vector vs. one with higher cancor or follow up
       if(alphaStart == "eigen") alphaInit = initialiseCanVar(A = ATrain, B = BTrain)[,1]
       if(alphaStart == "random") alphaInit = standardVar(replicate(1, rnorm(p)), normalise = TRUE)
-      if(alphaStart == "uniform") alphaInit = standardVar(matrix(rep(1, p), nrow = p, ncol = 1))
+      if(alphaStart == "uniform") alphaInit = standardVar(replicate(1, runif(p)), normalise = TRUE)
 
 
       if(isFALSE(silent)) progressBar(folds, f)
@@ -451,7 +452,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
 #' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' @export
-MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alphaStart = "eigen", folds = 10, silent = FALSE, toPlot = TRUE, typeResid = "basic", combination = FALSE, parallel_logic = FALSE) {
+MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alphaStart = c("eigen", "random", "uniform"), folds = 1, silent = FALSE, toPlot = TRUE, typeResid = "basic", combination = TRUE, parallel_logic = FALSE) {
 
   cancorComponents = matrix(NA, nrow = K, ncol = 1)
   alphaComponents  = matrix(NA, nrow = ncol(A), K)
@@ -522,7 +523,7 @@ MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alphaStart = "eigen", folds 
 #' @details For a exploratory analysis nonzero_a and nonzero_b can be vectors. The algorithm will then search for the best combination of sparsity choice nonzero_a and nonzero_b for each component.
 #' @return Matrix with permutation estimates.
 #' @export
-permcvscca = function(A, B, nonzero_a, nonzero_b, K, folds = 10, toPlot = FALSE, draws = 20, cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC", combination = TRUE) {
+permcvscca = function(A, B, nonzero_a, nonzero_b, K, folds = 1, toPlot = FALSE, draws = 20, cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC", combination = TRUE) {
   perm = matrix(NA, nrow = draws, ncol = K)
 
   if(isTRUE(parallel_logic)) {

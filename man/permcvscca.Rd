@@ -10,7 +10,7 @@ permcvscca(
   nonzero_a,
   nonzero_b,
   K,
-  folds = 10,
+  folds = 1,
   toPlot = FALSE,
   draws = 20,
   cancor,
