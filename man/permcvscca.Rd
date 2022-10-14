@@ -10,6 +10,7 @@ permcvscca(
   nonzero_a,
   nonzero_b,
   K,
+  alpha_init = c("eigen", "random", "uniform"),
   folds = 1,
   toPlot = FALSE,
   draws = 20,

@@ -9,7 +9,7 @@ KFoldSCCA(
   B,
   nonzero_a,
   nonzero_b,
-  alphaStart = c("eigen", "random", "uniform"),
+  alpha_init = c("eigen", "random", "uniform"),
   folds = 1,
   parallel_logic = FALSE,
   silent = FALSE,

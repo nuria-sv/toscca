@@ -10,7 +10,7 @@ MSCCA(
   nonzero_a,
   nonzero_b,
   K = 1,
-  alphaStart = c("eigen", "random", "uniform"),
+  alpha_init = c("eigen", "random", "uniform"),
   folds = 1,
   silent = FALSE,
   toPlot = TRUE,
@@ -26,7 +26,7 @@ MSCCA(
 
 \item{K}{Numeric. Number of components to be computed.}
 
-\item{alphaStart}{Character. Type initialisation for \deqn{\mathbf{\alpha}}. Default is "eigen".}
+\item{alpha_init}{Character. Type initialisation for \deqn{\mathbf{\alpha}}. Default is "eigen".}
 
 \item{folds}{Numeric. Number of folds for the cross-validation process.}
 

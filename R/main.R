@@ -475,7 +475,7 @@ MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ran
       Eb = standardVar(Eb)
     }
     if(combination) {
-      result = KFoldSCCA(A = Ea, B = Eb, nonzero_a, nonzero_b, alpha_init, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
+      result = KFoldSCCA(A = Ea, B = Eb, nonzero_a, nonzero_b, alpha_init = alpha_init, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
 
     } else {
       nonzero_aK = nonzero_a[k]
