@@ -283,13 +283,14 @@ SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6),
 #' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' \item{nonzero_a,nonzero_b}{Optimal nonzero values for each canonical vector.}
-KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 10, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL) {
+KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random", "uniform"), folds = 1, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL) {
   N = nrow(A) # observations
   p = ncol(A) # predictor variables (not really since CCA is symmetric)
   q = ncol(B) # response variables (not really since CCA is symmetric)
   s = rep(1:folds, times=ceiling(N/folds))
   s = s[1:N]
   s = s[sample(1:length(s), length(s))]
+  if(folds == 1) s[sample(1:N, 0.25*N)] = 2
   nonzeroGrid = expand.grid(nonzero_a, nonzero_b)
   h = nrow(nonzeroGrid)
   canCor = matrix(NA, folds, h)
@@ -314,9 +315,9 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
 
 
         # check between selected vector vs. one with higher cancor or follow up
-        if(alphaStart == "eigen") alphaInit = initialiseCanVar(A = ATrain, B = BTrain)[,1]
-        if(alphaStart == "random") alphaInit = standardVar(replicate(1, rnorm(p)), normalise = TRUE)
-        if(alphaStart == "uniform") alphaInit = standardVar(matrix(rep(1, p), nrow = p, ncol = 1))
+        if(alpha_init == "eigen") alphaInit = initialiseCanVar(A = ATrain, B = BTrain)[,1]
+        if(alpha_init == "random") alphaInit = standardVar(replicate(1, rnorm(p)), normalise = TRUE)
+        if(alpha_init == "uniform") alphaInit = standardVar(replicate(1, runif(p)), normalise = TRUE)
 
 
         if(isFALSE(silent)) progressBar(folds, f)
@@ -352,9 +353,9 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
 
 
       # check between selected vector vs. one with higher cancor or follow up
-      if(alphaStart == "eigen") alphaInit = initialiseCanVar(A = ATrain, B = BTrain)[,1]
-      if(alphaStart == "random") alphaInit = standardVar(replicate(1, rnorm(p)), normalise = TRUE)
-      if(alphaStart == "uniform") alphaInit = standardVar(matrix(rep(1, p), nrow = p, ncol = 1))
+      if(alpha_init == "eigen") alphaInit = initialiseCanVar(A = ATrain, B = BTrain)[,1]
+      if(alpha_init == "random") alphaInit = standardVar(replicate(1, rnorm(p)), normalise = TRUE)
+      if(alpha_init == "uniform") alphaInit = standardVar(replicate(1, runif(p)), normalise = TRUE)
 
 
       if(isFALSE(silent)) progressBar(folds, f)
@@ -437,7 +438,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
 #' @param A,B Data matrices.
 #' @param nonzero_a,nonzero_b Numeric. Scalar or vector over the number of nonzeroes allowed for a correlation estimate.
 #' @param K Numeric. Number of components to be computed.
-#' @param alphaStart Character. Type initialisation for \deqn{\mathbf{\alpha}}. Default is "eigen".
+#' @param alpha_init Character. Type initialisation for \deqn{\mathbf{\alpha}}. Default is "eigen".
 #' @param folds Numeric. Number of folds for the cross-validation process.
 #' @param silent Logical. If FALSE, a progress bar will appear on the console. Default is FALSE.
 #' @param toPlot Logical. If TRUE, plot will be generated automatically showing the estimated canonical weights. Default is TRUE.
@@ -451,7 +452,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alphaStart = "eigen", folds = 1
 #' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' @export
-MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alphaStart = "eigen", folds = 10, silent = FALSE, toPlot = TRUE, typeResid = "basic", combination = FALSE, parallel_logic = FALSE) {
+MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "random", "uniform"), folds = 1, silent = FALSE, toPlot = TRUE, typeResid = "basic", combination = TRUE, parallel_logic = FALSE) {
 
   cancorComponents = matrix(NA, nrow = K, ncol = 1)
   alphaComponents  = matrix(NA, nrow = ncol(A), K)
@@ -474,12 +475,12 @@ MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alphaStart = "eigen", folds 
       Eb = standardVar(Eb)
     }
     if(combination) {
-      result = KFoldSCCA(A = Ea, B = Eb, nonzero_a, nonzero_b, alphaStart, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
+      result = KFoldSCCA(A = Ea, B = Eb, nonzero_a, nonzero_b, alpha_init = alpha_init, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
 
     } else {
       nonzero_aK = nonzero_a[k]
       nonzero_bK = nonzero_b[k]
-      result = KFoldSCCA(A = Ea, B = Eb, nonzero_aK, nonzero_bK, alphaStart, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
+      result = KFoldSCCA(A = Ea, B = Eb, nonzero_aK, nonzero_bK, alpha_init, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
 
     }
 
@@ -522,7 +523,7 @@ MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alphaStart = "eigen", folds 
 #' @details For a exploratory analysis nonzero_a and nonzero_b can be vectors. The algorithm will then search for the best combination of sparsity choice nonzero_a and nonzero_b for each component.
 #' @return Matrix with permutation estimates.
 #' @export
-permcvscca = function(A, B, nonzero_a, nonzero_b, K, folds = 10, toPlot = FALSE, draws = 20, cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC", combination = TRUE) {
+permcvscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "random", "uniform"), folds = 1, toPlot = FALSE, draws = 20, cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC", combination = TRUE) {
   perm = matrix(NA, nrow = draws, ncol = K)
 
   if(isTRUE(parallel_logic)) {
@@ -535,7 +536,7 @@ permcvscca = function(A, B, nonzero_a, nonzero_b, K, folds = 10, toPlot = FALSE,
       if(isFALSE(silent)) progressBar(draws, d)
 
       ASample = A[sample(1:nrow(A), nrow(A)),]
-      t(CCAtStat(MSCCA(A=ASample, B=B, K = K, combination = combination, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE, parallel_logic = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]) #off-sample cancor
+      t(CCAtStat(MSCCA(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = combination, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE, parallel_logic = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]) #off-sample cancor
 
     }
 
@@ -544,7 +545,7 @@ permcvscca = function(A, B, nonzero_a, nonzero_b, K, folds = 10, toPlot = FALSE,
       # cat("|", rep(".", d), rep(" ", (draws-d)), "|", (d/draws)*100, "%\r")
       if(isFALSE(silent)) progressBar(draws, d)
       ASample = A[sample(1:nrow(A), nrow(A)),]
-      perm[d,] = CCAtStat(MSCCA(A=ASample, B=B, K = K, combination = combination, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]] #off-sample cancor
+      perm[d,] = CCAtStat(MSCCA(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = combination, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]] #off-sample cancor
 
 
     }
@@ -654,7 +655,7 @@ boostrapCCA = function(A, B, nonzero_a, nonzero_b, cancor, folds = 10, n = 100, 
       ASample = A[s, ]
       BSample = B[s, ]
       data    = list(ASample, BSample)
-      t[i] = CCAtStat(KFoldSCCA(A, B, alphaStart = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)
+      t[i] = CCAtStat(KFoldSCCA(A, B, alpha_init = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)
 
     }
 
@@ -665,7 +666,7 @@ boostrapCCA = function(A, B, nonzero_a, nonzero_b, cancor, folds = 10, n = 100, 
       ASample = A[s, ]
       BSample = B[s, ]
       data    = list(ASample, ASample)
-      t[i] = CCAtStat(KFoldSCCA(A, B, alphaStart = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, XSample, Y, C = nuisanceVar, type = testStatType)
+      t[i] = CCAtStat(KFoldSCCA(A, B, alpha_init = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, XSample, Y, C = nuisanceVar, type = testStatType)
 
 
     }
