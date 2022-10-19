@@ -73,7 +73,6 @@ standardVar = function(mat, centre = TRUE, normalise = FALSE) {
     XMat = matrix(mat, nrow = length(mat), ncol = 1)
   }
 
-
   if(centre) {
     center <- colMeans(XMat, na.rm=TRUE)
     XMat <- sweep(XMat, 2L, center)
