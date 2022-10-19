@@ -524,7 +524,7 @@ MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ran
 #' @details For a exploratory analysis nonzero_a and nonzero_b can be vectors. The algorithm will then search for the best combination of sparsity choice nonzero_a and nonzero_b for each component.
 #' @return Matrix with permutation estimates.
 #' @export
-permcvscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "random", "uniform"), folds = 1, toPlot = FALSE, draws = 20, cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC", combination = TRUE) {
+permcvscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "random", "uniform"), folds = 1, toPlot = FALSE, draws = 20, cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC") {
   perm = matrix(NA, nrow = draws, ncol = K)
 
   if(isTRUE(parallel_logic)) {
@@ -537,7 +537,7 @@ permcvscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
       if(isFALSE(silent)) progressBar(draws, d)
 
       ASample = A[sample(1:nrow(A), nrow(A)),]
-      t(CCAtStat(MSCCA(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = combination, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE, parallel_logic = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]) #off-sample cancor
+      t(CCAtStat(MSCCA(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE, parallel_logic = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]) #off-sample cancor
 
     }
 
@@ -546,7 +546,7 @@ permcvscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
       # cat("|", rep(".", d), rep(" ", (draws-d)), "|", (d/draws)*100, "%\r")
       if(isFALSE(silent)) progressBar(draws, d)
       ASample = A[sample(1:nrow(A), nrow(A)),]
-      perm[d,] = CCAtStat(MSCCA(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = combination, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]] #off-sample cancor
+      perm[d,] = CCAtStat(MSCCA(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]] #off-sample cancor
 
 
     }
@@ -603,7 +603,7 @@ permcvscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
 
   print(paste0("Empirical p-values: \n", pValues))
 
-  return(permCanCor)
+  return(perm)
 
 }
 

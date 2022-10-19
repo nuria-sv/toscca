@@ -19,8 +19,7 @@ permcvscca(
   silent = TRUE,
   parallel_logic = TRUE,
   nuisanceVar = 0,
-  testStatType = "CC",
-  combination = TRUE
+  testStatType = "CC"
 )
 }
 \arguments{
