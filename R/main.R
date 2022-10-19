@@ -142,7 +142,7 @@ getCanSubspace = function(mat, vec) {
 CCAtStat = function(cancor, A, B, C = 0, type = c("CC", "Wilks", "Roy")) {
   N = nrow(A)
   p = ncol(A)
-  q = ncol(Y)
+  q = ncol(B)
   K = length(cancor)
 
 
@@ -195,12 +195,12 @@ CCAtStat = function(cancor, A, B, C = 0, type = c("CC", "Wilks", "Roy")) {
 SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6), silent = FALSE)
 {
   if(ncol(B) <= max(nonzero_b)) {
-    message("At least one of the nonzero options for Y is not sparse. Changing to meet criteria")
+    message("At least one of the nonzero options for B is not sparse. Changing to meet criteria")
     nonzeroB = nonzero_b[nonzero_b < ncol(B)]
   }
 
   if(ncol(A) <= max(nonzero_a)) {
-    message("At least one of the nonzero options for X is not sparse. Changing to meet criteria")
+    message("At least one of the nonzero options for A is not sparse. Changing to meet criteria")
     nonzero_a = nonzero_a[nonzero_a < ncol(A)]
   }
 
