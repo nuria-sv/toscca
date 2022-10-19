@@ -66,11 +66,13 @@ standardVar = function(mat, centre = TRUE, normalise = FALSE) {
     if(length(dim(mat)) == 2) {
       XMat = matrix(mat, nrow = nrow(mat), ncol = ncol(mat))
 
+    } else {
+      XMat = matrix(mat, nrow = length(mat), ncol = 1)
     }
   } else {
     XMat = matrix(mat, nrow = length(mat), ncol = 1)
-
   }
+
 
   if(centre) {
     center <- colMeans(XMat, na.rm=TRUE)
@@ -90,6 +92,7 @@ standardVar = function(mat, centre = TRUE, normalise = FALSE) {
 
 
   if(isTRUE(normalise)) {
+    XMat = matrix(mat, nrow = length(mat), ncol = 1)
     vec <- matrix(XMat, ncol = 1)
     a <- sqrt(sum(vec^2))
     if(a==0) a <- .05
