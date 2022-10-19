@@ -138,6 +138,7 @@ getCanSubspace = function(mat, vec) {
 #' @param C An nxs matrix. Confounding variables.
 #' @param type Character. Choice of statistic: Canonical correlation, Wilks'statistic or Roy's statistic.
 #' @return Statistic
+#' @export
 CCAtStat = function(cancor, A, B, C = 0, type = c("CC", "Wilks", "Roy")) {
   N = nrow(A)
   p = ncol(A)
