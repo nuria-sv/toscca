@@ -417,7 +417,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random
   if(isTRUE(parallel_logic))  alphaInit = initialiseCanVar(A, B)[,1]
   if(isFALSE(parallel_logic)) alphaInit = resultKFold$alpha[, select]
 
-  result     = SCCA(alphaInit = alphaInit, A = A, B = B, nonzero_a = nonzeroGrid[select, 1], nonzero_b = nonzeroGrid[select, 2], silent = silent)
+  result     = SCCA(alphaInit = alphaInit, A = A, B = B, nonzero_a = nonzeroGrid[select, 1], nonzero_b = nonzeroGrid[select, 2], silent = TRUE)
 
 
   resultSCCA = list(cancor = canCorPrint,
