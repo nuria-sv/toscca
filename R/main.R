@@ -397,7 +397,10 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random
                "\n ........................................ \n"))
   }
 
+  if(toPlot $ combine) {
+    myHeatmap(canCor)
 
+  }
 
   if(toPlot & isFALSE(parallel_logic)) {
     par(mfrow = c(2, 2))

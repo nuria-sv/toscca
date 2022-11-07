@@ -5,21 +5,27 @@
 \title{Plot heatmap}
 \usage{
 myHeatmap(mat, palette = "Teal", coln = 12, xlab = "", ylab = "", axes = FALSE)
+
+myHeatmap(mat, palette = "Teal", coln = 12, xlab = "", ylab = "", axes = FALSE)
 }
 \arguments{
-\item{mat}{Matrix containing values along a grid.}
+\item{mat}{A square matrix nxm.}
 
 \item{palette}{Choice of palette. Default is Teal.}
 
-\item{coln}{Number of columns for the grid distribution. Default is 12.}
+\item{coln}{Integer. Grid length parameter.}
 
-\item{xlab}{Lable for X axis.}
+\item{xlab}{Character. Label for x axis.}
 
-\item{ylab}{Lable for Y axis.}
+\item{ylab}{Character. Label for y axis.}
 
-\item{axes}{Logical. Have axes between 0 and 1. Default is FALSE.}
+\item{axes}{Logical. If TRUE, axes are between 0 and 1.}
+
+\item{pallette}{Character. Name of pallette colour. Default is Teal.}
 }
 \value{
+Grid plot.
+
 Grid plot.
 }
 \description{
