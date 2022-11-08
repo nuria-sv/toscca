@@ -284,7 +284,7 @@ SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6),
 #' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' \item{nonzero_a,nonzero_b}{Optimal nonzero values for each canonical vector.}
-KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random", "uniform"), folds = 1, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL, combination = combination) {
+KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random", "uniform"), folds = 1, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL) {
   N = nrow(A) # observations
   p = ncol(A) # predictor variables (not really since CCA is symmetric)
   q = ncol(B) # response variables (not really since CCA is symmetric)
@@ -397,7 +397,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random
                "\n ........................................ \n"))
   }
 
-  if(toPlot & combination) {
+  if(toPlot & nrow(nonzeroGrid) > 1) {
     mat = matrix(canCor, nrow = length(nonzero_a), ncol = length(nonzero_b))
     rownames(mat) = nonzero_a
     colnames(mat) = nonzero_b
@@ -426,7 +426,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random
   result     = SCCA(alphaInit = alphaInit, A = A, B = B, nonzero_a = nonzeroGrid[select, 1], nonzero_b = nonzeroGrid[select, 2], silent = TRUE)
 
 
-  if(combination) {
+  if(nrow(nonzeroGrid) > 1) {
     resultSCCA = list(cancor = canCorPrint,
                     alpha  = result$alpha,
                     beta   = result$beta,
