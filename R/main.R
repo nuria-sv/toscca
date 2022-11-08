@@ -398,7 +398,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random
   }
 
   if(toPlot & combination) {
-    mat = matrix(canCor, nrow = nonzero_a, ncol = nonzero_b)
+    mat = matrix(canCor, nrow = length(nonzero_a), ncol = length(nonzero_b))
     rownames(mat) = nonzero_a
     colnames(mat) = nonzero_b
     myHeatmap(mat)
