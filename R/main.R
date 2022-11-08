@@ -397,7 +397,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random
                "\n ........................................ \n"))
   }
 
-  if(toPlot $ combine) {
+  if(toPlot & combination) {
     myHeatmap(canCor)
 
   }
