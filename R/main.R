@@ -284,7 +284,7 @@ SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6),
 #' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' \item{nonzero_a,nonzero_b}{Optimal nonzero values for each canonical vector.}
-KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random", "uniform"), folds = 1, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL) {
+KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random", "uniform"), folds = 1, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL, combination = combination) {
   N = nrow(A) # observations
   p = ncol(A) # predictor variables (not really since CCA is symmetric)
   q = ncol(B) # response variables (not really since CCA is symmetric)

@@ -15,7 +15,8 @@ KFoldSCCA(
   silent = FALSE,
   toPlot = TRUE,
   ATest_res = NULL,
-  BTest_res = NULL
+  BTest_res = NULL,
+  combination = combination
 )
 }
 \arguments{
