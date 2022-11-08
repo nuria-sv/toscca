@@ -398,7 +398,10 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random
   }
 
   if(toPlot & combination) {
-    myHeatmap(canCor)
+    mat = matrix(canCor, nrow = nonzero_a, ncol = nonzero_b)
+    rownames(mat) = nonzero_a
+    colnames(mat) = nonzero_b
+    myHeatmap(mat)
 
   }
 
@@ -423,14 +426,26 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init = c("eigen", "random
   result     = SCCA(alphaInit = alphaInit, A = A, B = B, nonzero_a = nonzeroGrid[select, 1], nonzero_b = nonzeroGrid[select, 2], silent = TRUE)
 
 
-  resultSCCA = list(cancor = canCorPrint,
+  if(combination) {
+    resultSCCA = list(cancor = canCorPrint,
                     alpha  = result$alpha,
                     beta   = result$beta,
                     # alphaMat       = alphaMat,
                     # betaMat        = betaMat,
                     # position       = select,
                     nonzero_a = nonzeroGrid[select, 1],
-                    nonzero_b = nonzeroGrid[select, 2])
+                    nonzero_b = nonzeroGrid[select, 2],
+                    canCor_grid = mat)
+  } else {
+    resultSCCA = list(cancor = canCorPrint,
+                      alpha  = result$alpha,
+                      beta   = result$beta,
+                      # alphaMat       = alphaMat,
+                      # betaMat        = betaMat,
+                      # position       = select,
+                      nonzero_a = nonzeroGrid[select, 1],
+                      nonzero_b = nonzeroGrid[select, 2])
+    }
 
   return(resultSCCA)
 }
