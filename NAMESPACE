@@ -2,12 +2,12 @@
 
 export(CCAtStat)
 export(MSCCA)
+export(MSCCA.perm)
 export(boostrapCCA)
 export(cpev.fun)
 export(getCanSubspace)
 export(initialiseCanVar)
 export(myHeatmap)
-export(permcvscca)
 export(powerMethod)
 export(residualisation)
 export(standardVar)

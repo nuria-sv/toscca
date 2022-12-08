@@ -542,7 +542,7 @@ MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ran
 #' @details For a exploratory analysis nonzero_a and nonzero_b can be vectors. The algorithm will then search for the best combination of sparsity choice nonzero_a and nonzero_b for each component.
 #' @return Matrix with permutation estimates.
 #' @export
-permcvscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "random", "uniform"), folds = 1, toPlot = FALSE, draws = 20, cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC") {
+MSCCA.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "random", "uniform"), folds = 1, toPlot = FALSE, draws = 20, cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC") {
   perm = matrix(NA, nrow = draws, ncol = K)
 
   if(isTRUE(parallel_logic)) {
@@ -607,7 +607,7 @@ permcvscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
     par(mfrow=c(1,1))
     hist(perm[, getWhich(testStatistic, max)], breaks = draws/2, xlab = "Canonical Correlation", xlim = xlim, ylim =  sort(modes(permDensity)$y), main = paste0("Distribution under de Null - ", testStatType, " Statistic") , col = "#93D9D9")
     lines(permDensity, col="black", lwd = 2)
-    lines(seq(xlim[1], xlim[2], 0.01), dnorm(seq(xlim[1], xlim[2], 0.01), mean(perm[, getWhich(modelCanCor, max)]), sd(perm[, getWhich(modelCanCor, max)])), col="steelblue", lwd = 2, lty = 4)
+    # lines(seq(xlim[1], xlim[2], 0.01), dnorm(seq(xlim[1], xlim[2], 0.01), mean(perm[, getWhich(modelCanCor, max)]), sd(perm[, getWhich(modelCanCor, max)])), col="steelblue", lwd = 2, lty = 4)
     lines(x = c(li, li), y = c(max(histNullCCA$density)*0.5/2, max(histNullCCA$density)*0.6/2))
     lines(x = c(ui, ui), y = c(max(histNullCCA$density)*0.5/2, max(histNullCCA$density)*0.6/2))
     lines(x = c(li, ui), y = rep((max(histNullCCA$density)*0.5/2 + max(histNullCCA$density)*0.6/2)/2, 2))
