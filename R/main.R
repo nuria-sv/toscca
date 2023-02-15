@@ -588,9 +588,11 @@ MSCCA.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
     hist(perm[, getWhich(testStatistic, max)], breaks = draws/2, xlab = "Canonical Correlation",
          xlim = xlim, ylim =  ylim, main = paste0("Distribution under de Null - ", testStatType, " Statistic") , col = "#93D9D9")
     lines(permDensity, col="black", lwd = 2)
-    lines(seq(xlim[1], xlim[2], 0.01), dnorm(seq(xlim[1], xlim[2], 0.01), mean(perm[, getWhich(testStatistic, max)]), sd(perm[, getWhich(testStatistic, max)])), col="steelblue", lwd = 2, lty = 4)
+    EnvStats::epdfPlot(perm[,getWhich(testStatistic, max)], discrete = FALSE, density.arg.list = NULL, plot.it = TRUE,
+             add = TRUE, epdf.col = "steelblue", epdf.lwd = 3 * par("cex"), epdf.lty = 1,
+             curve.fill = FALSE, curve.fill.col = "steelblue", main = NULL, xlab = NULL, ylab = NULL)
     abline(v=testStatistic, col = "red", lwd = 2)
-    legend("topleft", c("normal", "density", "model canCor"), col = c("steelblue", "black", "red"), lty=c(2, 1, 1), cex=0.8)
+    legend("topleft", c("Empirical pdf", "density", "model canCor"), col = c("steelblue", "black", "red"), lty=c(2, 1, 1), cex=0.8)
     text(x = as.character(testStatistic), y = 0.9*par('usr')[4], labels = as.character(1:K), cex = 0.9)
 
   } else {
@@ -619,9 +621,9 @@ MSCCA.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
 
   pValues = sapply(1:K, function (k) round(mean(testStatistic[k]<=(perm[, getWhich(testStatistic, max)])), 6))
 
-  print(paste0("Empirical p-values: \n", pValues))
+  print(cat("Empirical p-values:", c(2, 1, 2), sep = "\n"))
 
-  return(perm)
+  return(list(perm_estimate = perm, ))
 
 }
 
