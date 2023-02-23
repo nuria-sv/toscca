@@ -543,6 +543,8 @@ MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ran
 #' @return Matrix with permutation estimates.
 #' @export
 MSCCA.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "random", "uniform"), folds = 1, toPlot = FALSE, draws = 20, cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC") {
+  require(EnvStats)
+
   perm = matrix(NA, nrow = draws, ncol = K)
 
   if(isTRUE(parallel_logic)) {
