@@ -623,9 +623,9 @@ MSCCA.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
 
   pValues = sapply(1:K, function (k) round(mean(testStatistic[k]<=(perm[, getWhich(testStatistic, max)])), 6))
 
-  print(cat("Empirical p-values:", c(2, 1, 2), sep = "\n"))
+  print(cat("Empirical p-values:", pValues, sep = "\n"))
 
-  return(list(perm_estimate = perm, ))
+  return(list(perm_estimate = perm, p_values = pValues))
 
 }
 

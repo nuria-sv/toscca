@@ -1,0 +1,108 @@
+---
+title: "TOSCCA"
+author: "nsv"
+date: "2023-04-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+This is an R Markdown document to reproduce the analysis described in "A framework for interpretation and testing of sparse canonical correlations". 
+
+
+
+```{r library, include=FALSE}
+library(toscca)
+library(PMA)
+
+library(doParallel)
+library(foreach)
+```
+
+
+## Simulations
+We simulate data for 3 underlying signals of different size on a high-dimensional setting. That is, 
+$$
+\mathbf{X} \in \mathbb{R}^{n\times p} \quad \text{and} \quad \mathbf{Y}\in \mathbb{R}^{n\times q}, 
+\\
+\text{where } n = 100, \text{ } p = 2500 \text{ and } q = 500.
+$$
+
+```{r data, echo=FALSE}
+#sample size etc
+N = 100
+p = 2500
+q = 500
+#################################################
+#Simulate noise 
+X0 = sapply(1:p, function(x) rnorm(N))
+Y0 = sapply(1:q, function(x) rnorm(N))
+
+colnames(X0) = paste0("x", 1:p)
+colnames(Y0) = paste0("y", 1:q)
+
+###################################
+  # Manual signal
+  #Signal 1 (columns 1:10)
+
+  Z1 = rnorm(N,0,1)
+  Z2 = rnorm(N,-3,1)
+  Z3 = rnorm(N,10,1)
+
+  #Some associations with the true signal
+  alpha1 = (1:10) / 10
+  beta1  = -(1:20) / 10
+  alpha2 = ((p/2):(p/2 + 100)) / 1500
+  beta2  = -(40:120) / 120
+  alpha3 = (200:220) / 300
+  beta3  = -(200:250) / 300
+  
+  loc_alpha1 = sample(1:p, length(alpha1), replace = FALSE) # 1:length(alpha1)
+  loc_beta1  = sample(1:q, length(beta1), replace = FALSE)  # 1:length(beta1)
+  loc_alpha2 = sample((1:p)[!(1:p %in% loc_alpha1)], length(alpha2), replace = FALSE) # (p/2):(p/2 + length(alpha2) - 1)
+  loc_beta2  = sample((1:q)[!(1:q %in% loc_beta1)], length(beta2), replace = FALSE)   # 40:(40 + length(beta2) -1)
+  loc_alpha3 = sample((1:p)[!(1:p %in% c(loc_alpha1, loc_alpha2))], length(alpha3), replace = FALSE) # 200:(200+length(alpha3) - 1)
+  loc_beta3  = sample((1:q)[!(1:q %in% c(loc_beta1, loc_beta2))], length(beta3), replace = FALSE)    # 200:(200 + length(beta3) -1)
+  
+# ordered signal
+
+  for(i in 1:length(alpha1))
+    X0[, loc_alpha1[i]] =  alpha1[i] * Z1 + rnorm(N,0,0.3)
+
+  for(i in 1:length(beta1))
+    Y0[, loc_beta1[i]] =  beta1[i] * Z1 + rnorm(N,0,0.3)
+
+  for(i in 1:length(alpha2))
+    X0[, loc_alpha2[i]] =  alpha2[i] * Z2 + rnorm(N,0,0.03)
+
+  for(i in 1:length(beta2))
+    Y0[, loc_beta2[i]] =  beta2[i] * Z2 + rnorm(N,0,0.03)
+
+  for(i in 1:length(alpha3))
+    X0[, loc_alpha3[i]] =  alpha3[i] * Z3 + rnorm(N,0,0.5)
+
+  for(i in 1:length(beta3))
+    Y0[, loc_beta3[i]] =  beta3[i] * Z3 + rnorm(N,0,0.5)
+  
+```
+
+## Canonical Correlation Analysis
+We use the method described in the paper, Thresholded Ordered Sparse Canonical Correlation Analysis (TOSCCA), to uncover the underlying processes linking the data. 
+
+```{r}
+X = standardVar(X0)
+Y = standardVar(Y0)
+K = 4                                       # number of components to be estimated
+nonz_x = rep(100, K)                        # number of nonzero variables for X
+nonz_y = rep(100, K)                        # number of nonzero variables for Y
+init   = "uniform"                          # type of initialisation
+cca_toscca  = toscca::MSCCA(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
+cpev_toscca = sapply(1:K, function(k) cpev.fun(X, X%*%cca_toscca$alpha[,1:k]))
+
+perm_toscca = MSCCA.perm(X, Y, nonz_x, nonz_y, K = 4, init, draws = 100, cancor = cca_toscca$cancor)
+```
+
+We repeat the analysis using the Penalised Matrix Analysis approach from the PMA R-package. 
