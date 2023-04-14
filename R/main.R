@@ -578,7 +578,7 @@ MSCCA.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
 
   margin = 0.05
   testStatistic = CCAtStat(cancor, A, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]
-  h =  hist(perm[, getWhich(testStatistic, max)], breaks = draws/2)
+  h =  hist(perm[, getWhich(testStatistic, max)], breaks = draws/2, plot = FALSE)
 
   if(is.null(bootCCA)) {
     permDensity = density(perm[, getWhich(testStatistic, max)])
@@ -588,12 +588,12 @@ MSCCA.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
 
     par(mfrow=c(1,1))
     hist(perm[, getWhich(testStatistic, max)], breaks = draws/2, xlab = "Canonical Correlation",
-         xlim = xlim, ylim =  ylim, main = paste0("Distribution under de Null - ", testStatType, " Statistic") , col = "#93D9D9")
+         xlim = xlim, ylim =  ylim, main = paste0("Distribution under de Null - ", testStatType, " Statistic") , col =  scales::alpha("#01768c", 0.2))
     lines(permDensity, col="black", lwd = 2)
     EnvStats::epdfPlot(perm[,getWhich(testStatistic, max)], discrete = FALSE, density.arg.list = NULL, plot.it = TRUE,
              add = TRUE, epdf.col = "steelblue", epdf.lwd = 3 * par("cex"), epdf.lty = 1,
              curve.fill = FALSE, curve.fill.col = "steelblue", main = NULL, xlab = NULL, ylab = NULL)
-    abline(v=testStatistic, col = "red", lwd = 2)
+    abline(v=testStatistic, col = "e86d07", lwd = 2)
     legend("topleft", c("Empirical pdf", "density", "model canCor"), col = c("steelblue", "black", "red"), lty=c(2, 1, 1), cex=0.8)
     text(x = as.character(testStatistic), y = 0.9*par('usr')[4], labels = as.character(1:K), cex = 0.9)
 

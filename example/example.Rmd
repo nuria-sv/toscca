@@ -60,12 +60,12 @@ colnames(Y0) = paste0("y", 1:q)
   alpha3 = (200:220) / 300
   beta3  = -(200:250) / 300
   
-  loc_alpha1 = sample(1:p, length(alpha1), replace = FALSE) # 1:length(alpha1)
-  loc_beta1  = sample(1:q, length(beta1), replace = FALSE)  # 1:length(beta1)
-  loc_alpha2 = sample((1:p)[!(1:p %in% loc_alpha1)], length(alpha2), replace = FALSE) # (p/2):(p/2 + length(alpha2) - 1)
-  loc_beta2  = sample((1:q)[!(1:q %in% loc_beta1)], length(beta2), replace = FALSE)   # 40:(40 + length(beta2) -1)
-  loc_alpha3 = sample((1:p)[!(1:p %in% c(loc_alpha1, loc_alpha2))], length(alpha3), replace = FALSE) # 200:(200+length(alpha3) - 1)
-  loc_beta3  = sample((1:q)[!(1:q %in% c(loc_beta1, loc_beta2))], length(beta3), replace = FALSE)    # 200:(200 + length(beta3) -1)
+  loc_alpha1 = 1:length(alpha1) # sample(1:p, length(alpha1), replace = FALSE) # 
+  loc_beta1  = 1:length(beta1)  # sample(1:q, length(beta1), replace = FALSE)  # 
+  loc_alpha2 = (p/2):(p/2 + length(alpha2) - 1) # sample((1:p)[!(1:p %in% loc_alpha1)], length(alpha2), replace = FALSE) # 
+  loc_beta2  = 40:(40 + length(beta2) -1) # sample((1:q)[!(1:q %in% loc_beta1)], length(beta2), replace = FALSE)   # 
+  loc_alpha3 = 200:(200+length(alpha3) - 1) # sample((1:p)[!(1:p %in% c(loc_alpha1, loc_alpha2))], length(alpha3), replace = FALSE) #
+  loc_beta3  = 200:(200 + length(beta3) -1) # sample((1:q)[!(1:q %in% c(loc_beta1, loc_beta2))], length(beta3), replace = FALSE)    # 
   
 # ordered signal
 
@@ -92,7 +92,7 @@ colnames(Y0) = paste0("y", 1:q)
 ## Canonical Correlation Analysis
 We use the method described in the paper, Thresholded Ordered Sparse Canonical Correlation Analysis (TOSCCA), to uncover the underlying processes linking the data. 
 
-```{r}
+```{r toscca, message=FALSE}
 X = standardVar(X0)
 Y = standardVar(Y0)
 K = 4                                       # number of components to be estimated
@@ -105,4 +105,470 @@ cpev_toscca = sapply(1:K, function(k) cpev.fun(X, X%*%cca_toscca$alpha[,1:k]))
 perm_toscca = MSCCA.perm(X, Y, nonz_x, nonz_y, K = 4, init, draws = 100, cancor = cca_toscca$cancor)
 ```
 
-We repeat the analysis using the Penalised Matrix Analysis approach from the PMA R-package. 
+We repeat the analysis using the Penalised Matrix Analysis approach from the PMA R-package. I have modified the main function to allow for different initialisations (such as random uniform and random normal) to compare to our models' performance. 
+
+```{r, include=FALSE}
+CCA_pma_random <- function(x, z, typex=c("standard", "ordered"), typez=c("standard","ordered"), start = "uniform", penaltyx=NULL, penaltyz=NULL, K=1, niter=15, v=NULL, trace=TRUE, standardize=TRUE, xnames=NULL, znames=NULL, chromx=NULL, chromz=NULL, upos=FALSE, uneg=FALSE, vpos=FALSE, vneg=FALSE, outcome=NULL, y=NULL, cens=NULL){
+  if(ncol(x)<2) stop("Need at least two features in dataset x.")
+  if(ncol(z)<2) stop("Need at least two features in dataset z.")
+  if(upos && uneg) stop("At most one of upos and uneg should be TRUE!")
+  if(vpos && vneg)  stop("At most one of vpos and vneg should be TRUE!")
+  if(typez=="ordered" && (vpos||vneg)) stop("Cannot require elements of v to be positive or negative if typez is ordered")
+  if(typex=="ordered" && (upos||uneg)) stop("Cannot require elements of u to be positive or negative if typex is ordered")
+  typex <- match.arg(typex)
+  typez <- match.arg(typez)
+  call <- match.call()
+  if(sum(is.na(x))+sum(is.na(z)) > 0) stop("Cannot have NAs in x or z")
+  if(nrow(x)!=nrow(z)) stop("x and z must have same number of rows")
+  if(standardize){
+    sdx <- apply(x,2,sd)
+    sdz <- apply(z,2,sd)
+    if(min(sdx)==0) stop("Cannot standardize because some of the columns of x have std. dev. 0")
+    if(min(sdz)==0) stop("Cannot standardize because some of the columns of z have std. dev. 0")
+    x <- scale(x,TRUE,sdx)
+    z <- scale(z,TRUE,sdz)
+  }
+  if(!is.null(outcome)){
+    pheno.out <- CCAPhenotypeZeroSome(x,z,y,qt=.8, cens=cens, outcome=outcome, typex=typex, typez=typez)
+    x <- pheno.out$x
+    z <- pheno.out$z
+  }
+  if(typex=="standard" && !is.null(chromx)) warning("Chromx has no effect for type standard")
+  if(typez=="standard" && !is.null(chromz)) warning("Chromz has no effect for type standard")
+  if(start == "eigen")   v <- CheckVs(v,x,z,K) # initialises v through svd if n>p,q or eigen approximation of svd
+  if(start == "random")  v <- matrix(rnorm(ncol(z)*K, 0, 1), ncol = K) # 
+  if(start == "uniform") v <- matrix(runif(ncol(z)*K, 0, 1), ncol = K) # 
+  if(is.null(penaltyx)){
+    if(typex=="standard") penaltyx <- .3#pmax(1.001,.3*sqrt(ncol(x)))/sqrt(ncol(x))
+    if(typex=="ordered")  penaltyx <- ChooseLambda1Lambda2(as.numeric(CheckVs(NULL,z,x,1))) # v[,1] used to be NULL
+  }
+  if(is.null(penaltyz)){
+    if(typez=="standard") penaltyz <- .3#pmax(1.001,.3*sqrt(ncol(z)))/sqrt(ncol(z))
+    if(typez=="ordered")  penaltyz <-  ChooseLambda1Lambda2(as.numeric(CheckVs(NULL,x,z,1))) # ChooseLambda1Lambda2(as.numeric(v[,1]))
+  }
+  if(!is.null(penaltyx)){
+    if(typex=="standard" && (penaltyx<0 || penaltyx>1)) stop("Penaltyx must be between 0 and 1 when typex is standard.")
+    if(typex=="ordered" && penaltyx<0) stop("Penaltyx must be non-negative when typex is standard.")
+  }
+  if(!is.null(penaltyz)){
+    if(typez=="standard" && (penaltyz<0 || penaltyz>1)) stop("Penaltyz must be between 0 and 1 when typez is standard.")
+    if(typez=="ordered" && penaltyz<0) stop("Penaltyz must be non-negative when typez is standard.")
+  }
+  out <- CCAAlgorithm(x=x,z=z,v=v,typex=typex,typez=typez,penaltyx=penaltyx,penaltyz=penaltyz,K=K,niter=niter,trace=trace,chromx=chromx,chromz=chromz,upos=upos,uneg=uneg,vpos=vpos,vneg=vneg)
+  out$outcome <- outcome
+  out$call <- call
+  out$xnames <- xnames
+  out$znames <- znames
+  out$typex<-typex
+  out$typez<-typez
+  out$penaltyx<-penaltyx
+  out$penaltyz<-penaltyz
+  out$K <- K
+  out$niter <- niter
+  out$upos <- upos
+  out$uneg <- uneg
+  out$vpos <- vpos
+  out$vneg <- vneg
+  out$xnames <- xnames
+  out$znames <- znames
+  out$v.init <- v
+  out$cors <- numeric(K)
+  for(k in 1:K){
+    if(sum(out$u[,k]!=0)>0 && sum(out$v[,k]!=0)>0) out$cors[k] <- cor(x%*%out$u[,k],z%*%out$v[,k])
+  }
+  class(out) <- "CCA"
+  return(out)
+}
+
+#' @method print CCA
+#' @export
+print.CCA <- function(x,verbose=FALSE,...){
+  cat("Call: ")
+  dput(x$call)
+  cat("\n\n")
+  cat("Num non-zeros u's: ", apply(x$u!=0,2,sum), "\n")
+  cat("Num non-zeros v's: ", apply(x$v!=0,2,sum), "\n")
+  cat("Type of x: ", x$typex,"\n")
+  cat("Type of z: ", x$typez,"\n")
+  if(x$typex=="standard") cat("Penalty for x: L1 bound is ", x$penaltyx, "\n")
+  if(x$typez=="standard") cat("Penalty for z: L1 bound is ", x$penaltyz, "\n")
+  if(x$typex=="ordered") cat("Penalty for x: Lambda is ", x$penaltyx, "\n")
+  if(x$typez=="ordered") cat("Penalty for z: Lambda is ", x$penaltyz, "\n")
+  if(x$upos) cat("U's constrained to be positive", fill=TRUE)
+  if(x$uneg) cat("U's constrained to be negative", fill=TRUE)
+  if(x$vpos) cat("V's constrained to be positive", fill=TRUE)
+  if(x$vneg) cat("V's constrained to be negative", fill=TRUE)
+  if(!is.null(x$outcome)) cat("Outcome used: ", x$outcome, fill=TRUE)
+  cat("Cor(Xu,Zv): ", x$cors, fill=TRUE)
+  if(verbose){
+    for(k in 1:x$K){
+      cat("\n Component ", k, ":\n")
+      u <- x$u[,k]
+      v <- x$v[,k]
+      if(is.null(x$xnames)) x$xnames <- 1:length(u)
+      if(is.null(x$znames)) x$znames <- 1:length(v)
+      cat(fill=T)
+      us <- cbind(x$xnames[u!=0], round(u[u!=0],3))
+      dimnames(us) <- list(1:sum(u!=0), c("Row Feature Name", "Row Feature Weight"))
+      vs <- cbind(x$znames[v!=0], round(v[v!=0],3))
+      dimnames(vs) <- list(1:sum(v!=0), c("Column Feature Name", "Column Feature Weight"))
+      print(us, quote=FALSE, sep="\t")
+      cat(fill=T)
+      print(vs, quote=FALSE, sep="\t")
+    }
+  }
+}
+
+SparseCCA <- function(x,y,v,typex,typez,penaltyx, penaltyz,niter,trace, upos, uneg, vpos, vneg,chromx,chromz){
+  vold <- rnorm(length(v))
+  u <- rnorm(ncol(x))
+  for(i in 1:niter){
+    if(sum(is.na(u))>0 || sum(is.na(v))>0){
+      v <- rep(0, length(v))
+      vold <- v
+    }
+    if(sum(abs(vold-v))>1e-6){
+      if(trace) cat(i,fill=F)
+      # Update u #
+      unew <- rep(NA, ncol(x))
+      if(typex=="standard"){
+        #argu <- t(x)%*%(y%*%v)
+        argu <- matrix(y%*%v,nrow=1)%*%x # t(yv)x
+        if(upos) argu <- pmax(argu,0)
+        if(uneg) argu <- pmin(argu,0)
+        lamu <- BinarySearch(argu,penaltyx*sqrt(ncol(x))) # choice of sparsity by proposition
+        su <- soft(argu,lamu) # soft thresholding based on lamu
+        u <-  matrix(su/l2n(su), ncol=1)
+      }else if(typex=="ordered"){
+        yv <- y%*%v
+        if(is.null(chromx)) chromx <- rep(1, ncol(x))
+        for(j in unique(chromx)){
+          xyv <- as.numeric(t(yv)%*%x[,chromx==j])#as.numeric(t(x[,chromx==j])%*%yv) # gives same as argu apparently
+          if(penaltyx!=0){
+            coefs <- FLSA(xyv/l2n(xyv),lambda1=penaltyx,lambda2=penaltyx)
+            #            diagfl.out <- diag.fused.lasso.new(xyv/l2n(xyv), lam1=penaltyx)
+            #            lam2ind <- which.min(abs(diagfl.out$lam2-penaltyx))
+            #            coefs <- diagfl.out$coef[,lam2ind]
+          }
+          if(penaltyx==0){
+            coefs <- xyv/l2n(xyv)
+          }
+          unew[chromx==j] <- coefs
+        }
+        u <- unew
+        if(sum(is.na(u))==0 && sum(abs(u))>0) u <- u/l2n(u)
+        u <- matrix(u,ncol=1)
+      }
+      # Done updating u #
+      # Update v #
+      vnew <- rep(NA, ncol(y))
+      if(typez=="standard"){
+        vold <- v
+        #argv <- (t(u)%*%t(x))%*%y
+        argv <- matrix(x%*%u,nrow=1)%*%y
+        if(vpos) argv <- pmax(argv,0)
+        if(vneg) argv <- pmin(argv,0)
+        lamv <- BinarySearch(argv,penaltyz*sqrt(ncol(y)))
+        sv <- soft(argv, lamv)
+        v <-  matrix(sv/l2n(sv),ncol=1)
+      } else if (typez=="ordered"){
+        xu <- x%*%u
+        if(is.null(chromz)) chromz <- rep(1, ncol(y))
+        for(j in unique(chromz)){
+          yxu <- as.numeric(t(xu)%*%y[,chromz==j])#as.numeric(t(y[,chromz==j])%*%xu)
+          if(penaltyz!=0){
+            coefs <- FLSA(yxu/l2n(yxu),lambda1=penaltyz,lambda2=penaltyz)
+            #            diagfl.out <- diag.fused.lasso.new(yxu/l2n(yxu), lam1=penaltyz)
+            #            lam2ind <- which.min(abs(diagfl.out$lam2-penaltyz))
+            #            coefs <- diagfl.out$coef[,lam2ind]
+          }
+          if(penaltyz==0){
+            coefs <- yxu/l2n(yxu)
+          }
+          vnew[chromz==j] <- coefs
+        }
+        v <- vnew
+        if(sum(is.na(v))==0 && sum(abs(v))>0) v <- v/l2n(v)
+        v <- matrix(v,ncol=1)
+      }
+      # Done updating v #
+    }
+  }
+  if(trace) cat(fill=T)
+  # Update d #
+  d <-  sum((x%*%u)*(y%*%v))
+  # Done updating d #
+  if(sum(is.na(u))>0 || sum(is.na(v))>0){
+    u <- matrix(rep(0,ncol(x)),ncol=1)
+    v <- matrix(rep(0,ncol(y)),ncol=1)
+    d <- 0
+  }
+  return(list(u=u,v=v,d=d))
+}
+
+
+CCAAlgorithm <- function(x,z,v,typex,typez,penaltyx,penaltyz,K,niter,trace,chromx,chromz,upos,uneg,vpos,vneg){
+  if(typez!="ordered"){
+    if(K>1) v.init <- v[apply(z^2,2,sum)!=0,]
+    if(K==1) v.init <- v[apply(z^2,2,sum)!=0]
+  } else {
+    v.init <- v
+  }
+  v.init <- matrix(v.init,ncol=K)
+  u=v=d=NULL
+  xres <- x; zres <- z
+  if(typex!="ordered") xres <- x[,apply(x^2,2,sum)!=0]
+  if(typez!="ordered") zres <- z[,apply(z^2,2,sum)!=0]
+  for(k in 1:K){
+    if(vpos && sum(abs(v.init[v.init[,k]>0,k]))<sum(abs(v.init[v.init[,k]<0,k]))) v.init[,k] <- -v.init[,k]
+    if(vneg && sum(abs(v.init[v.init[,k]<0,k]))<sum(abs(v.init[v.init[,k]>0,k]))) v.init[,k] <- -v.init[,k]
+    out <- SparseCCA(xres,zres,v.init[,k],typex,typez,penaltyx, penaltyz,niter,trace, upos, uneg, vpos, vneg,chromx,chromz)
+    coef <- out$d
+    d <- c(d, coef)
+    xres <- rbind(xres, sqrt(coef)*t(out$u))
+    zres <- rbind(zres, -sqrt(coef)*t(out$v))
+    u <- cbind(u, out$u)
+    v <- cbind(v, out$v)
+  }
+  ubig <- u
+  vbig <- v
+  if(typex!="ordered"){
+    ubig <- matrix(0,nrow=ncol(x),ncol=K)
+    ubig[apply(x^2,2,sum)!=0,] <- u # so that if data is zero, coef is too
+  }
+  if(typez!="ordered"){
+    vbig <- matrix(0,nrow=ncol(z),ncol=K)
+    vbig[apply(z^2,2,sum)!=0,] <- v
+  }
+  return(list(u=ubig,v=vbig,d=d))
+}
+CheckVs <- function(v,x,z,K){ # If v is NULL, then get v as appropriate.
+  ##print(list(v=v, x = x, z = z, K = K))
+  if(!is.null(v) && !is.matrix(v)) v <- matrix(v,nrow=ncol(z))
+  if(!is.null(v) && ncol(v)<K) v <- NULL
+  if(!is.null(v) && ncol(v)>K) v <- matrix(v[,1:K],ncol=K)
+  if(is.null(v) && ncol(z)>nrow(z) && ncol(x)>nrow(x)){
+    v <- try(matrix(fastsvd(x,z)$v[,1:K],ncol=K), silent=TRUE) # technique through max eigen value and sdv tu find v and u's initialisation
+    attempt <- 1
+    while(("try-error" %in% class(v))  && attempt < 10){
+      v <- try(matrix(fastsvd(x,z)$v[,1:K],ncol=K), silent=TRUE)
+      attempt <- attempt+1
+    }
+    if(attempt==10) stop("Problem computing SVD.")
+  } else if (is.null(v) && (ncol(z)<=nrow(z) || ncol(x)<=nrow(x))){
+    attempt <- 1
+    v <- try(matrix(svd(t(x)%*%z)$v[,1:K],ncol=K), silent=TRUE)
+    while(("try-error" %in% class(v)) && attempt<10){
+      v <- try(matrix(svd(t(x)%*%z)$v[,1:K],ncol=K), silent=TRUE)
+      attempt <- attempt+1
+    }
+    if(attempt==10) stop("Problem computing SVD.")
+  }
+  return(v)
+}
+
+fastsvd <- function(x,z){
+  # fast svd of t(x)%*%z, where ncol(x)>>nrow(x) and same for z
+  xx=x%*%t(x) # nxn
+  xx2=msqrt(xx)
+  y=t(z)%*%xx2 # qxn
+  a=try(svd(y), silent=TRUE)
+  iter <- 1
+  if(class(a)=="try-error" && iter<10){
+    a=try(svd(y), silent=TRUE)
+    iter <- iter+1
+  }
+  if(iter==10) stop("too many tries.")
+  v=a$u
+  d=a$d
+  zz=z%*%t(z)
+  zz2=msqrt(zz)
+  y=t(x)%*%zz2
+  a=try(svd(y), silent=TRUE)
+  iter <- 1
+  if(class(a)=="try-error" && iter<10){
+    a=try(svd(y), silent=TRUE)
+    iter <- iter+1
+  }
+  if(iter==10) stop("too many tries.")
+  u=a$u
+  return(list(u=u,v=v,d=d))
+}
+
+msqrt <- function(x){
+  eigenx <- eigen(x)
+  return(eigenx$vectors%*%diag(sqrt(pmax(0,eigenx$values)))%*%t(eigenx$vectors))
+}
+
+
+
+# thresholding ------------------------------------------------------------
+
+soft <- function(x,d){
+  return(sign(x)*pmax(0, abs(x)-d))
+}
+
+mean.na <- function(vec){
+  return(mean(vec[!is.na(vec)]))
+}
+
+l2n <- function(vec){
+  a <- sqrt(sum(vec^2))
+  if(a==0) a <- .05
+  return(a)
+}
+
+safesvd <- function(x){
+  i <- 1
+  out <- try(svd(x), silent=TRUE)
+  while(i<10 && class(out)=="try-error"){
+    out <- try(svd(x), silent=TRUE)
+    i <- i+1
+  }
+  if(class(out)=="try-error") out <- svd(matrix(rnorm(nrow(x)*ncol(x)), ncol=ncol(x)))
+  return(out)
+}
+
+BinarySearch <- function(argu,sumabs){
+  if(l2n(argu)==0 || sum(abs(argu/l2n(argu)))<=sumabs) return(0)
+  lam1 <- 0
+  lam2 <- max(abs(argu))-1e-5
+  iter <- 1
+  while(iter < 150){
+    su <- soft(argu,(lam1+lam2)/2)
+    if(sum(abs(su/l2n(su)))<sumabs){ # sumabs is penalty sqrt dim
+      lam2 <- (lam1+lam2)/2
+    } else {
+      lam1 <- (lam1+lam2)/2
+    }
+    if((lam2-lam1)<1e-6) return((lam1+lam2)/2)
+    iter <- iter+1
+  }
+  warning("Didn't quite converge")
+  return((lam1+lam2)/2)
+}
+
+
+
+SMD <- function(x, sumabsu, sumabsv, niter=20,trace=TRUE, v, upos, uneg, vpos, vneg){
+  # This gets a single factor. Do MultiSMD to get multiple factors.
+  nas <- is.na(x)
+  v.init <- v
+  xoo <- x
+  if(sum(nas)>0) xoo[nas] <- mean(x[!nas])
+  oldv <- rnorm(ncol(x))
+  for(iter in 1:niter){
+    if(sum(abs(oldv-v))>1e-7){
+      oldv <- v
+      if(trace) cat(iter,fill=F)
+      # update u #
+      argu <- xoo%*%v
+      if(upos) argu <- pmax(argu,0)
+      if(uneg) argu <- pmin(argu,0)
+      lamu <- BinarySearch(argu,sumabsu)
+      su <- soft(argu,lamu)
+      u <- matrix(su/l2n(su),ncol=1)
+      # done updating u #
+      # update v #
+      argv <- t(u)%*%xoo
+      if(vpos) argv <- pmax(argv,0)
+      if(vneg) argv <- pmin(argv,0)
+      lamv <- BinarySearch(argv, sumabsv)
+      sv <- soft(argv,lamv)
+      v <- matrix(sv/l2n(sv),ncol=1)
+      # done updating v #
+    }
+  }
+  d <- as.numeric(t(u)%*%(xoo%*%v))
+  if(trace) cat(fill=TRUE)
+  return(list(d=d, u=u, v=v, v.init=v.init))
+}
+
+SMDOrth <- function(x, us, sumabsv=NULL, niter=20, trace=TRUE,v, vpos, vneg){
+  # Gets the next u for sparse PCA, using Trevor's method of requiring this new u to be orthog
+  # to all previous us (contained in us)
+  nas <- is.na(x)
+  v.init <- v
+  xoo <- x
+  if(sum(nas)>0) xoo[nas] <- mean(x[!nas])
+  u <- rnorm(nrow(x))
+  oldu <- rnorm(nrow(x))
+  oldv <- rnorm(ncol(x))
+  for(iter in 1:niter){
+    if(sum(abs(oldu-u))>1e-6 || sum(abs(oldv-v))>1e-6){
+      oldu <- u
+      oldv <- v
+      if(trace) cat(iter,fill=F)
+      # update u #
+      argu <- xoo%*%v
+      numer <- lsfit(y=argu, x=us, intercept=FALSE)$res
+      u <- numer/l2n(numer)
+      # done updating u #
+      # update v #
+      argv <- t(u)%*%xoo
+      if(vpos) argv <- pmax(argv,0)
+      if(vneg) argv <- pmin(argv,0)
+      lamv <- BinarySearch(argv, sumabsv)
+      sv <- soft(argv,lamv)
+      v <- matrix(sv/l2n(sv),ncol=1)
+      # done updating v #
+    }
+  }
+  d <- as.numeric(t(u)%*%(xoo%*%v))
+  if(trace) cat(fill=TRUE)
+  return(list(d=d,u=u,v=v, v.init=v.init))
+}
+
+
+CheckPMDV <-  function(v,x,K){
+  if(!is.null(v) && is.matrix(v) && ncol(v)>=K){
+    v <- matrix(v[,1:K], ncol=K)
+  } else if(ncol(x)>nrow(x)){
+    x[is.na(x)] <- mean.na(x)
+    v <- matrix(t(x)%*%(safesvd(x%*%t(x))$v[,1:K]),ncol=K)
+    if(sum(is.na(v))>0) v <- matrix(safesvd(x)$v[,1:K], ncol=K)
+    v <- sweep(v,2,apply(v, 2, l2n), "/")
+    if(sum(is.na(v))>0) stop("some are NA")
+  } else if (ncol(x)<=nrow(x)){
+    x[is.na(x)] <- mean.na(x)
+    v <- matrix(safesvd(t(x)%*%x)$v[,1:K],ncol=K)
+  }
+  return(v)
+}
+```
+
+```{r pma}
+pma_lambda = PMA::CCA.permute(X, Y, typex = "standard", typez = "standard")
+cca_pma = CCA_pma_random(X, Y, K = 4, typex = "standard", typez = "standard", start = "uniform", 
+                         penaltyx = pma_lambda$bestpenaltyx, pma_lambda$bestpenaltyz)
+```
+
+
+```{r plots, echo=FALSE}
+aa= matrix(0, p, K)
+aa[loc_alpha1, 1] <- alpha1; aa[loc_alpha2, 2] <- alpha2; aa[loc_alpha3, 3] <- alpha3
+bb= matrix(0, q, K)
+bb[loc_beta1, 1] <- beta1; bb[loc_beta2, 2] <- beta2; bb[loc_beta3, 3] <- beta3
+
+margin = 0.05
+
+ylima1 = c(min(aa[,1]) - margin, max(aa[,1]) + margin)
+ylima2 = c(min(aa[,2]) - margin, max(aa[,2]) + margin)
+ylimb1 = c(min(bb[,1]) - margin, max(bb[,1]) + margin)
+ylimb2 = c(min(bb[,2]) - margin, max(bb[,2]) + margin)
+
+par(mfrow=c(3,4), mar=c(4., 4.5, 3, 0.5)) # mar (bottom, left, top, right)
+
+plot(aa[,1], pch = 15, ylim = ylima1, main = expression(alpha[1]), cex.main = 1.5, ylab = "True", xlab = "")
+plot(aa[,2], pch = 15, ylim = ylima2, main = expression(alpha[2]), cex.main = 1.5, ylab = "", xlab = "")
+plot(bb[,1], pch = 15, ylim = ylimb1, main = expression(beta[1]), cex.main = 1.5, ylab = "", xlab = "")
+plot(bb[,2], pch = 15, ylim = ylimb2, main = expression(beta[2]), cex.main = 1.5, ylab = "", xlab = "")
+plot(cca_toscca$alpha[,2], pch = 15, ylim = ylima1, ylab = "TOSCCA", xlab = "")
+plot(cca_toscca$alpha[,1], pch = 15, ylim = ylima2, ylab = "", xlab = "")
+plot(cca_toscca$beta[,2], pch = 15, ylim = ylimb1, ylab = "", xlab = "")
+plot(cca_toscca$beta[,1], pch = 15, ylim = ylimb2, ylab = "", xlab = "")
+plot(cca_pma$v[,2], pch = 15, ylim = ylima1, ylab = "PMA", xlab = "p")
+plot(cca_pma$v[,1], pch = 15, ylim = ylima2, ylab = "", xlab = "p")
+plot(cca_pma$u[,2], pch = 15, ylim = ylimb1, ylab = "", xlab = "q")
+plot(cca_pma$u[,1], pch = 15, ylim = ylimb2, ylab = "", xlab = "q")
+```
