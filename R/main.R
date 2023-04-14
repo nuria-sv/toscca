@@ -597,6 +597,7 @@ MSCCA.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
     legend("topleft", c("Empirical pdf", "density", "model canCor"), col = c("steelblue", "black", "red"), lty=c(2, 1, 1), cex=0.8)
     text(x = as.character(testStatistic), y = 0.9*par('usr')[4], labels = as.character(1:K), cex = 0.9)
 
+
   } else {
     li = bootCCA$ccaInterval[1]
     ui = bootCCA$ccaInterval[2]
