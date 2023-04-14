@@ -593,9 +593,10 @@ MSCCA.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
     EnvStats::epdfPlot(perm[,getWhich(testStatistic, max)], discrete = FALSE, density.arg.list = NULL, plot.it = TRUE,
              add = TRUE, epdf.col = "steelblue", epdf.lwd = 3 * par("cex"), epdf.lty = 1,
              curve.fill = FALSE, curve.fill.col = "steelblue", main = NULL, xlab = NULL, ylab = NULL)
-    abline(v=testStatistic, col = "e86d07", lwd = 2)
+    abline(v=testStatistic, col = "#e86d07", lwd = 2)
     legend("topleft", c("Empirical pdf", "density", "model canCor"), col = c("steelblue", "black", "red"), lty=c(2, 1, 1), cex=0.8)
     text(x = as.character(testStatistic), y = 0.9*par('usr')[4], labels = as.character(1:K), cex = 0.9)
+
 
   } else {
     li = bootCCA$ccaInterval[1]
