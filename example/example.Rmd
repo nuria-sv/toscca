@@ -103,10 +103,10 @@ K = 4                                       # number of components to be estimat
 nonz_x = rep(100, K)                        # number of nonzero variables for X
 nonz_y = rep(100, K)                        # number of nonzero variables for Y
 init   = "uniform"                          # type of initialisation
-cca_toscca  = toscca::MSCCA(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
+cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
 cpev_toscca = sapply(1:K, function(k) cpev.fun(X, X%*%cca_toscca$alpha[,1:k]))
 
-perm_toscca = MSCCA.perm(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor = cca_toscca$cancor)
+perm_toscca = perm.toscca(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor = cca_toscca$cancor)
 ```
 
 We repeat the analysis using the Penalised Matrix Analysis approach from the PMA R-package. I have modified the main function to allow for different initialisations (such as random uniform and random normal) to compare to our models' performance. 
@@ -588,7 +588,7 @@ beta = matrix(NA, nrow = ncol(Y), ncol = length(nonz_y))
 cancor = rep(NA, 10)
 
 for (i in 1:length(nonz_x)) {
-  cca_res =  toscca::MSCCA(X, Y, K = 2, nonzero_a = rep(nonz_x[i],2), nonzero_b = c(50,nonz_y), combination = FALSE, toPlot = FALSE, alpha_init = "uniform")
+  cca_res =  toscca::toscca(X, Y, K = 2, nonzero_a = rep(nonz_x[i],2), nonzero_b = c(50,nonz_y), combination = FALSE, toPlot = FALSE, alpha_init = "uniform")
   alpha[,i] =cca_res$alpha[,1]
   beta[,i] = cca_res$beta[,1]
   cancor[i] = cca_res$cancor[1]
