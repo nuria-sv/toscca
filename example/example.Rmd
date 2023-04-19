@@ -579,7 +579,7 @@ plot(cca_pma$u[,1], pch = 15, ylim = ylimb2, ylab = "", xlab = "q")
 
 Then we run the algorithm several times with different sparsity levels for $\alpha$, keeping those for $\beta$ fixed. We observed the variables making up the signal are repeatedly selected with a higher frequency than the noise variables. The implication being that noise variable are selected once the signal has been retrieved. 
 
-```{r, eacho=FAlSE}
+```{r, echo=FALSE}
 nonz_x = seq(10, 400, 50)
 nonz_y = seq(10, 400, 50)
 
@@ -682,8 +682,11 @@ kable(
   caption = "Autocorrelation between components"
   )
 
+adj_cpev = rbind(adj_cpev_pma, adj_cpev_toscca)
+rownames(adj_cpev) <- c("PMA", "TOSCCA")
+colnames(adj_cpev) <- paste0("K", 1:K)
 kable(
-  rbind(adj_cpev_pma, adj_cpev_toscca),
+  adj_cpev,
   col.names = colnames(adj_cpev_pma),
   # row.names = row.names(auto_cor),
   # digits = 2,

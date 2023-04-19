@@ -46,9 +46,6 @@
 <!-- ABOUT THE PACKAGE -->
 ## About The Project
 
-The [algorithm]("example/algorithm.pdf") for the functions is:
-![algorithm](https://github.com/nuria-sv/toscca/example/master/algorithm.pdf?raw=true)
-
 This R-package contains the software to compute thresholded ordered sparse canonical correlation analysis (toscca); this approach to canonical correlation analysis (cca) is described in the paper (x). 
 
 The main functions of the package are:
@@ -58,27 +55,11 @@ The main functions of the package are:
 
 The details of the method are fully described in the paper
 
+The [algorithm]("/example/algorithm.png") for the functions is:
+![algo](example/algorithm.png "algo")
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-### Built With
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 
 
