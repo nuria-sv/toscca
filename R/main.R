@@ -192,7 +192,7 @@ CCAtStat = function(cancor, A, B, C = 0, type = c("CC", "Wilks", "Roy")) {
 #' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' \item{cancor_all}{Call canonical correlations calculated for each sparsity levels.}
-SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6), silent = FALSE)
+toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6), silent = FALSE)
 {
   if(ncol(B) <= max(nonzero_b)) {
     message("At least one of the nonzero options for B is not sparse. Changing to meet criteria")
@@ -284,7 +284,7 @@ SCCA = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6),
 #' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' \item{nonzero_a,nonzero_b}{Optimal nonzero values for each canonical vector.}
-KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL) {
+folds.toscca = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL) {
   N = nrow(A) # observations
   p = ncol(A) # predictor variables (not really since CCA is symmetric)
   q = ncol(B) # response variables (not really since CCA is symmetric)
@@ -323,7 +323,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, parallel
 
         if(isFALSE(silent)) progressBar(folds, f)
 
-        resultKFold = SCCA(alphaInit = alphaInit, A = ATrain, B = BTrain, nonzero_a = nonzeroGrid[,1], nonzero_b = nonzeroGrid[,2], silent = silent)
+        resultKFold = toscca.core(alphaInit = alphaInit, A = ATrain, B = BTrain, nonzero_a = nonzeroGrid[,1], nonzero_b = nonzeroGrid[,2], silent = silent)
 
         alphaMat[[f]] <- resultKFold$alpha
         betaMat[[f]]  <- resultKFold$beta
@@ -361,7 +361,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, parallel
 
       if(isFALSE(silent)) progressBar(folds, f)
 
-      resultKFold = SCCA(alphaInit = alphaInit, A = ATrain, B = BTrain, nonzero_a = nonzeroGrid[,1], nonzero_b = nonzeroGrid[,2], silent = silent)
+      resultKFold = toscca.core(alphaInit = alphaInit, A = ATrain, B = BTrain, nonzero_a = nonzeroGrid[,1], nonzero_b = nonzeroGrid[,2], silent = silent)
 
       alphaMat[[f]] <- resultKFold$alpha
       betaMat[[f]]  <- resultKFold$beta
@@ -423,7 +423,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, parallel
   if(isTRUE(parallel_logic))  alphaInit = initialiseCanVar(A, B)[,1]
   if(isFALSE(parallel_logic)) alphaInit = resultKFold$alpha[, select]
 
-  result     = SCCA(alphaInit = alphaInit, A = A, B = B, nonzero_a = nonzeroGrid[select, 1], nonzero_b = nonzeroGrid[select, 2], silent = TRUE)
+  result     = toscca.core(alphaInit = alphaInit, A = A, B = B, nonzero_a = nonzeroGrid[select, 1], nonzero_b = nonzeroGrid[select, 2], silent = TRUE)
 
 
   if(nrow(nonzeroGrid) > 1) {
@@ -471,7 +471,7 @@ KFoldSCCA = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, parallel
 #' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' @export
-MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "random", "uniform"), folds = 1, silent = FALSE, toPlot = TRUE, typeResid = "basic", combination = TRUE, parallel_logic = FALSE) {
+toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "random", "uniform"), folds = 1, silent = FALSE, toPlot = TRUE, typeResid = "basic", combination = TRUE, parallel_logic = FALSE) {
 
   cancorComponents = matrix(NA, nrow = K, ncol = 1)
   alphaComponents  = matrix(NA, nrow = ncol(A), K)
@@ -494,12 +494,12 @@ MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ran
       Eb = standardVar(Eb)
     }
     if(combination) {
-      result = KFoldSCCA(A = Ea, B = Eb, nonzero_a, nonzero_b, alpha_init, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
+      result = folds.toscca(A = Ea, B = Eb, nonzero_a, nonzero_b, alpha_init, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
 
     } else {
       nonzero_aK = nonzero_a[k]
       nonzero_bK = nonzero_b[k]
-      result = KFoldSCCA(A = Ea, B = Eb, nonzero_aK, nonzero_bK, alpha_init, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
+      result = folds.toscca(A = Ea, B = Eb, nonzero_aK, nonzero_bK, alpha_init, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
 
     }
 
@@ -524,7 +524,7 @@ MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ran
   return(resultSCCA)
 }
 
-#' Permutation testing for MSCCA
+#' Permutation testing for toscca
 #'
 #' @description This function performs permutation testing on CC estimates.
 #' @param A,B Data matrices.
@@ -542,7 +542,7 @@ MSCCA = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ran
 #' @details For a exploratory analysis nonzero_a and nonzero_b can be vectors. The algorithm will then search for the best combination of sparsity choice nonzero_a and nonzero_b for each component.
 #' @return Matrix with permutation estimates.
 #' @export
-MSCCA.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "random", "uniform"), folds = 1, toPlot = FALSE, draws = 20, cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC") {
+perm.toscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "random", "uniform"), folds = 1, toPlot = FALSE, draws = 20, cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC") {
   require(EnvStats)
 
   perm = matrix(NA, nrow = draws, ncol = K)
@@ -557,7 +557,7 @@ MSCCA.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
       if(isFALSE(silent)) progressBar(draws, d)
 
       ASample = A[sample(1:nrow(A), nrow(A)),]
-      t(CCAtStat(MSCCA(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE, parallel_logic = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]) #off-sample cancor
+      t(CCAtStat(toscca(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE, parallel_logic = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]) #off-sample cancor
 
     }
 
@@ -566,7 +566,7 @@ MSCCA.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "ra
       # cat("|", rep(".", d), rep(" ", (draws-d)), "|", (d/draws)*100, "%\r")
       if(isFALSE(silent)) progressBar(draws, d)
       ASample = A[sample(1:nrow(A), nrow(A)),]
-      perm[d,] = CCAtStat(MSCCA(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]] #off-sample cancor
+      perm[d,] = CCAtStat(toscca(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]] #off-sample cancor
 
 
     }
@@ -679,7 +679,7 @@ boostrapCCA = function(A, B, nonzero_a, nonzero_b, cancor, folds = 10, n = 100, 
       ASample = A[s, ]
       BSample = B[s, ]
       data    = list(ASample, BSample)
-      t[i] = CCAtStat(KFoldSCCA(A, B, alpha_init = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)
+      t[i] = CCAtStat(folds.toscca(A, B, alpha_init = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)
 
     }
 
@@ -690,7 +690,7 @@ boostrapCCA = function(A, B, nonzero_a, nonzero_b, cancor, folds = 10, n = 100, 
       ASample = A[s, ]
       BSample = B[s, ]
       data    = list(ASample, ASample)
-      t[i] = CCAtStat(KFoldSCCA(A, B, alpha_init = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, XSample, Y, C = nuisanceVar, type = testStatType)
+      t[i] = CCAtStat(folds.toscca(A, B, alpha_init = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, XSample, Y, C = nuisanceVar, type = testStatType)
 
 
     }
