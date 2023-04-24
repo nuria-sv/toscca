@@ -1,16 +1,37 @@
 ---
-title: "TOSCCA"
-author: "nsv"
-date: "2023-04-13"
-output: html_document
+output: github_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
 ```
 
+# toscca
 
-This is an R Markdown document to reproduce the analysis described in "A framework for interpretation and testing of sparse canonical correlations". 
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of toscca is to ...
+
+## Installation
+
+You can install the development version of toscca from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("nuria-sv/toscca")
+```
+
+## Example
+
+This is a basic example which shows you how to reproduce the analysis described in "A framework for interpretation and testing of sparse canonical correlations". 
 
 
 
