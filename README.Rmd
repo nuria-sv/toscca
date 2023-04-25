@@ -621,10 +621,10 @@ for (i in 1:length(nonz_x)) {
   cancor[i] = cca_res$cancor[1]
   
 }
-par(mfrow=c(1,1),mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-
-matplot(alpha, type = "l"); legend("topright", as.character(nonz_x),col=seq_len(K),cex=0.8,fill=seq_len(10), inset=c(-0.081,0), title = "nonzero")
-matplot(beta, type = "l"); legend("topright", as.character(nonz_x),col=seq_len(K),cex=0.8,fill=seq_len(10), inset=c(-0.081,0), title = "nonzero")
+# par(mfrow=c(1,1),mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
+# 
+# matplot(alpha, type = "l"); legend("topright", as.character(nonz_x),col=seq_len(K),cex=0.8,fill=seq_len(10), inset=c(-0.081,0), title = "nonzero")
+# matplot(beta, type = "l"); legend("topright", as.character(nonz_x),col=seq_len(K),cex=0.8,fill=seq_len(10), inset=c(-0.081,0), title = "nonzero")
 
 numToBi = function(data) {
   r = nrow(data)
