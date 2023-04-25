@@ -582,20 +582,26 @@ ylima2 = c(min(aa[,2]) - margin, max(aa[,2]) + margin)
 ylimb1 = c(min(bb[,1]) - margin, max(bb[,1]) + margin)
 ylimb2 = c(min(bb[,2]) - margin, max(bb[,2]) + margin)
 
+mc_a = t(aa)%*%cca_toscca$alpha
+mc_b = t(bb)%*%cca_toscca$beta
+
+mp_a = t(aa)%*%cca_pma$u
+mp_b = t(bb)%*%cca_pma$v
+
 par(mfrow=c(3,4), mar=c(4., 4.5, 3, 0.5)) # mar (bottom, left, top, right)
 
 plot(aa[,1], pch = 15, ylim = ylima1, main = expression(alpha[1]), cex.main = 1.5, ylab = "True", xlab = "")
 plot(aa[,2], pch = 15, ylim = ylima2, main = expression(alpha[2]), cex.main = 1.5, ylab = "", xlab = "")
 plot(bb[,1], pch = 15, ylim = ylimb1, main = expression(beta[1]), cex.main = 1.5, ylab = "", xlab = "")
 plot(bb[,2], pch = 15, ylim = ylimb2, main = expression(beta[2]), cex.main = 1.5, ylab = "", xlab = "")
-plot(cca_toscca$alpha[,2], pch = 15, ylim = ylima1, ylab = "TOSCCA", xlab = "")
-plot(cca_toscca$alpha[,1], pch = 15, ylim = ylima2, ylab = "", xlab = "")
-plot(cca_toscca$beta[,2], pch = 15, ylim = ylimb1, ylab = "", xlab = "")
-plot(cca_toscca$beta[,1], pch = 15, ylim = ylimb2, ylab = "", xlab = "")
-plot(cca_pma$v[,2], pch = 15, ylim = ylima1, ylab = "PMA", xlab = "p")
-plot(cca_pma$v[,1], pch = 15, ylim = ylima2, ylab = "", xlab = "p")
-plot(cca_pma$u[,2], pch = 15, ylim = ylimb1, ylab = "", xlab = "q")
-plot(cca_pma$u[,1], pch = 15, ylim = ylimb2, ylab = "", xlab = "q")
+plot(cca_toscca$alpha[,which(mc_a[1,]==max(mc_a[1,]))], pch = 15, ylim = ylima1, ylab = "TOSCCA", xlab = "")
+plot(cca_toscca$alpha[,which(mc_a[2,]==max(mc_a[2,]))], pch = 15, ylim = ylima2, ylab = "", xlab = "")
+plot(cca_toscca$beta[,which(mc_b[1,]==max(mc_b[1,]))], pch = 15, ylim = ylimb1, ylab = "", xlab = "")
+plot(cca_toscca$beta[,which(mc_b[2,]==max(mc_b[2,]))], pch = 15, ylim = ylimb2, ylab = "", xlab = "")
+plot(cca_pma$v[,which(mp_a[1,]==max(mp_a[1,]))[1]], pch = 15, ylim = ylima1, ylab = "PMA", xlab = "p")
+plot(cca_pma$v[,which(mp_a[2,]==max(mp_a[2,]))[1]], pch = 15, ylim = ylima2, ylab = "", xlab = "p")
+plot(cca_pma$u[,which(mp_b[1,]==max(mp_b[1,]))[1]], pch = 15, ylim = ylimb1, ylab = "", xlab = "q")
+plot(cca_pma$u[,which(mp_b[2,]==max(mp_b[2,]))[1]], pch = 15, ylim = ylimb2, ylab = "", xlab = "q")
 ```
 
 Then we run the algorithm several times with different sparsity levels for $\alpha$, keeping those for $\beta$ fixed. We observed the variables making up the signal are repeatedly selected with a higher frequency than the noise variables. The implication being that noise variable are selected once the signal has been retrieved. 
