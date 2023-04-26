@@ -6,7 +6,9 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of toscca is to …
+The goal of toscca is to find sparse canonical vectors maximally correlating two data sets. The number of nonzero variables must be stated beforehand. The descriptive algorithm can be seen below. 
+
+![alt text](https://github.com/nuria-sv/toscca/blob/master/algorithm.png)
 
 ## Installation
 
@@ -17,8 +19,6 @@ You can install the development version of toscca from
 # install.packages("devtools")
 devtools::install_github("nuria-sv/toscca")
 ```
-
-## Example
 
 This is a basic example which shows you how to reproduce the analysis
 described in “A framework for interpretation and testing of sparse
@@ -33,7 +33,7 @@ high-dimensional setting. That is, $$
 \text{where } n = 100, \text{ } p = 2500 \text{ and } q = 500.
 $$
 
-## Canonical Correlation Analysis
+### Canonical Correlation Analysis
 
 We use the method described in the paper, Thresholded Ordered Sparse
 Canonical Correlation Analysis (TOSCCA), to uncover the underlying
@@ -321,7 +321,7 @@ selected once the signal has been retrieved.
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
-## Cummulative percentage of explained variance (CPEV) and correlation between components.
+### Cummulative percentage of explained variance (CPEV) and correlation between components.
 
 AS discussed in the paper, a common measure to evaluated whether or not
 to compute another component is the CPEV, as seen in the equation below.
