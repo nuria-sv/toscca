@@ -40,16 +40,6 @@ getWhich = function(data, fun) {
 }
 
 
-triangleArea = function(x, y, z = 0, type = c("rectangle")) { #assume a vertice is origin
-
-  h = x - z
-  b = y - z
-  tArea = (b*h)/2
-
-  tArea
-
-
-}
 #' Stardardise a matrix
 #'
 #' This function stardardises a matrix or a vector and gives the option to
@@ -102,45 +92,6 @@ standardVar = function(mat, centre = TRUE, normalise = FALSE) {
 
   Xstan
 }
-
-
-#' Plot heatmap
-#'
-#' This function generated a heatmap. Withing the package it is used to
-#' provide with a visualisation of the exploration of optimal sparsity levels.
-#'
-#' @param mat Matrix containing values along a grid.
-#' @param palette Choice of palette. Default is Teal.
-#' @param coln Number of columns for the grid distribution. Default is 12.
-#' @param xlab Lable for X axis.
-#' @param ylab Lable for Y axis.
-#' @param axes Logical. Have axes between 0 and 1. Default is FALSE.
-#' @return Grid plot.
-#' @export
-myHeatmap = function (mat, palette = "Teal", coln = 12, xlab = "", ylab = "", axes = FALSE)
-{
-  par(fig = c(0, 7/10, 0, 1))
-  image(mat, col = hcl.colors(length(mat), palette, rev = TRUE), axes = axes, xlab = xlab, ylab = ylab)
-  if(isFALSE(axes)) {
-    axis(1, seq(0, 1, length = nrow(mat)), rownames(mat))
-    axis(2, seq(0, 1, length = ncol(mat)), colnames(mat), las = 1)
-  }
-
-  # if (as == "i") {
-  #   axis(1, seq(0, 1, length = nrow(mat)), c(1:nrow(mat)),
-  #        tck = FALSE)
-  #   axis(2, seq(0, 1, length = ncol(mat)), c(1:ncol(mat)),
-  #        tck = FALSE)
-  # }
-
-  par(fig = c(7/10, 1, 0, 1), new = TRUE)
-  colvec = matrix(seq(min(mat), max(mat), length = coln))
-  image(t(colvec), col = hcl.colors(12, palette, rev = TRUE), axes = FALSE)
-  axis(2, seq(0.0625, 1, length = 10/2), format(colvec[seq(2,
-                                                           10, 2)], digits = 3, nsmall = 2), las = 1)
-  par(fig = c(0, 1, 0, 1))
-}
-
 
 
 #' Performs power method.

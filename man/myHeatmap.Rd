@@ -2,16 +2,12 @@
 % Please edit documentation in R/basic.R
 \name{myHeatmap}
 \alias{myHeatmap}
-\title{Plot heatmap}
+\title{Plots grid of CC over threshold penalty}
 \usage{
-myHeatmap(mat, palette = "Teal", coln = 12, xlab = "", ylab = "", axes = FALSE)
-
 myHeatmap(mat, palette = "Teal", coln = 12, xlab = "", ylab = "", axes = FALSE)
 }
 \arguments{
 \item{mat}{A square matrix nxm.}
-
-\item{palette}{Choice of palette. Default is Teal.}
 
 \item{coln}{Integer. Grid length parameter.}
 
@@ -25,10 +21,7 @@ myHeatmap(mat, palette = "Teal", coln = 12, xlab = "", ylab = "", axes = FALSE)
 }
 \value{
 Grid plot.
-
-Grid plot.
 }
 \description{
-This function generated a heatmap. Withing the package it is used to
-provide with a visualisation of the exploration of optimal sparsity levels.
+Plots grid of CC over threshold penalty
 }

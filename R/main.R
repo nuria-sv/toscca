@@ -7,7 +7,7 @@ eigenDecompostion = function(A) {
   if(nrow(A) != ncol(A)) stop("Matrix should be square.")
 
   e = eigen(A)
-  E = e$vector%*%diag(sqrt(pmax(0,e$values)))%*%t(e$vectors) # make positive definite matrix
+  E = e$vector%*%diag(sqrt(pmax(0,e$values)))%*%t(e$vectors)   # make positive definite matrix
   # transpose of eigenvectors is equat to inversy => symmetry
 
   return(E)
@@ -112,10 +112,9 @@ cpev.fun = function(mat, matK) {
   return(cpev)
 
 }
-#' Performs matrix residualisation over estimated canonical vectors. There are
-#' three types: basic (subtracts scaled estimated latent variable from data),
-#' null (uses the null space of the estimated canonical vector to construct a
-#' new matrix) and LV (uses SVD to residualise).
+#' Performs matrix residualisation over estimated canonical vectors by
+#' using the null space of the estimated canonical vector to construct a
+#' new matrix.
 #'
 #' @param mat An nxp matrix.
 #' @param vec A vector of dimensions nxk.
@@ -220,8 +219,9 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
 
 
     gamma =  A %*% alpha
-    dist = sqrt(colSums(gamma^2))
+    dist  = sqrt(colSums(gamma^2))
     gamma = sweep(gamma, 2, dist, "/")
+
 
     beta = t(B) %*% gamma
 
@@ -239,6 +239,7 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
     dist = sqrt(colSums(zeta^2))
     zeta = sweep(zeta, 2, dist, "/")
 
+
     alpha = t(A) %*% zeta
 
     alpha = apply(rbind(alpha,nonzero_a), 2, function(x)
@@ -251,8 +252,9 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
       sign(y) * tmp
     })
 
+
     if(length(nonzero_a) == 1) e = mean(abs(gamma - varTol1)) + mean(abs(zeta - varTol2))
-    if(length(nonzero_a) > 1) e = mean(colMeans(abs(gamma - varTol1))) + mean(colMeans(abs(zeta - varTol2)))
+    if(length(nonzero_a) > 1) e  = mean(colMeans(abs(gamma - varTol1))) + mean(colMeans(abs(zeta - varTol2)))
 
     textSCCA = paste0(" Common convergence error: ", round(e, 5), " & Iterations: ", i)
     if(isFALSE(silent) & (e<= tol || i > iter)) cat(textSCCA, "\r")
@@ -334,8 +336,7 @@ folds.toscca = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
         if(ncol(gamma) + ncol(zeta) > 2) canCor[f,]  = abs(sapply(1:ncol(gamma), function(j) cor(gamma[,j], zeta[,j])))
         if(ncol(gamma) + ncol(zeta) == 2) canCor[f,] = abs(cor(gamma, zeta))
 
-        # cat(canCor[1:k,], "\r")
-        # cat(table(s), "\r")
+
         if(any(is.na(canCor[f,]))) stop("oneis NA")
 
         if(f == folds) resultKFold <<- resultKFold
@@ -372,8 +373,7 @@ folds.toscca = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
       if(ncol(gamma) + ncol(zeta) > 2) canCor[f,]  = abs(sapply(1:ncol(gamma), function(j) cor(gamma[,j], zeta[,j])))
       if(ncol(gamma) + ncol(zeta) == 2) canCor[f,] = abs(cor(gamma, zeta))
 
-      # cat(canCor[1:k,], "\r")
-      # cat(table(s), "\r")
+
       if(any(is.na(canCor[f,]))) stop("oneis NA")
 
     }
