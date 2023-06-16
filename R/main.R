@@ -193,6 +193,8 @@ CCAtStat = function(cancor, A, B, C = 0, type = c("CC", "Wilks", "Roy")) {
 #' \item{cancor_all}{Call canonical correlations calculated for each sparsity levels.}
 toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6), silent = FALSE)
 {
+
+  # checks
   if(ncol(B) <= max(nonzero_b)) {
     message("At least one of the nonzero options for B is not sparse. Changing to meet criteria")
     nonzeroB = nonzero_b[nonzero_b < ncol(B)]
@@ -202,6 +204,7 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
     message("At least one of the nonzero options for A is not sparse. Changing to meet criteria")
     nonzero_a = nonzero_a[nonzero_a < ncol(A)]
   }
+
 
   #Create the matrix A
   alpha = sapply(nonzero_a, function(x) c(alphaInit))
@@ -473,6 +476,27 @@ folds.toscca = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
 #' @export
 toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "random", "uniform"), folds = 1, silent = FALSE, toPlot = TRUE, typeResid = "basic", combination = TRUE, parallel_logic = FALSE) {
 
+  # checks
+
+
+  if(K != length(nonzero_a)) {
+    if(K > 1 & length(nonzero_a) == 1) {
+      nonzero_a = rep(nonzero_a, K)
+    } else {
+      message("nonzero_a must have length 1 or K.")
+    }
+  }
+
+  if(K != length(nonzero_b)) {
+    if(K > 1 & length(nonzero_n) == 1) {
+      nonzero_b = rep(nonzero_b, K)
+    } else {
+      message("nonzero_b must have length 1 or K.")
+    }
+  }
+
+
+  # set up
   cancorComponents = matrix(NA, nrow = K, ncol = 1)
   alphaComponents  = matrix(NA, nrow = ncol(A), K)
   betaComponents   = matrix(NA, nrow = ncol(B), K)
