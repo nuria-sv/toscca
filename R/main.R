@@ -488,7 +488,7 @@ toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ra
   }
 
   if(K != length(nonzero_b)) {
-    if(K > 1 & length(nonzero_n) == 1) {
+    if(K > 1 & length(nonzero_b) == 1) {
       nonzero_b = rep(nonzero_b, K)
     } else {
       message("nonzero_b must have length 1 or K.")
