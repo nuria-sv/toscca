@@ -130,36 +130,3 @@ powerMethod = function(mat, vec, tol = 10^(-6), maxIter = 500, silent = TRUE) {
               iterations = t))
 }
 
-#' Plots grid of CC over threshold penalty
-#'
-#'
-#' @param mat A square matrix nxm.
-#' @param pallette Character. Name of pallette colour. Default is Teal.
-#' @param coln Integer. Grid length parameter.
-#' @param xlab Character. Label for x axis.
-#' @param ylab Character. Label for y axis.
-#' @param axes Logical. If TRUE, axes are between 0 and 1.
-#' @return Grid plot.
-myHeatmap = function (mat, palette = "Teal", coln = 12, xlab = "", ylab = "", axes = FALSE)
-{
-  par(fig = c(0, 7/10, 0, 1))
-  image(mat, col = hcl.colors(length(mat), palette, rev = TRUE), axes = axes, xlab = xlab, ylab = ylab)
-  if(isFALSE(axes)) {
-    axis(1, seq(0, 1, length = nrow(mat)), rownames(mat))
-    axis(2, seq(0, 1, length = ncol(mat)), colnames(mat), las = 1)
-  }
-
-  # if (as == "i") {
-  #   axis(1, seq(0, 1, length = nrow(mat)), c(1:nrow(mat)),
-  #        tck = FALSE)
-  #   axis(2, seq(0, 1, length = ncol(mat)), c(1:ncol(mat)),
-  #        tck = FALSE)
-  # }
-
-  par(fig = c(7/10, 1, 0, 1), new = TRUE)
-  colvec = matrix(seq(min(mat), max(mat), length = coln))
-  image(t(colvec), col = hcl.colors(coln, palette, rev = TRUE), axes = FALSE)
-  axis(2, seq(0.0625, 1, length = 10/2), format(colvec[seq(2,
-                                                           10, 2)], digits = 3, nsmall = 2), las = 1)
-  par(fig = c(0, 1, 0, 1))
-}
