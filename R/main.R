@@ -7,7 +7,7 @@ eigenDecompostion = function(A) {
   if(nrow(A) != ncol(A)) stop("Matrix should be square.")
 
   e = eigen(A)
-  E = e$vector%*%diag(sqrt(pmax(0,e$values)))%*%t(e$vectors) # make positive definite matrix
+  E = e$vector%*%diag(sqrt(pmax(0,e$values)))%*%t(e$vectors)   # make positive definite matrix
   # transpose of eigenvectors is equat to inversy => symmetry
 
   return(E)
@@ -32,6 +32,41 @@ initialiseCanVar = function(A, B) {
 
   return(alpha0)
 
+}
+
+
+#' Plots grid of CC over threshold penalty
+#'
+#'
+#' @param mat A square matrix nxm.
+#' @param pallette Character. Name of pallette colour. Default is Teal.
+#' @param coln Integer. Grid length parameter.
+#' @param xlab Character. Label for x axis.
+#' @param ylab Character. Label for y axis.
+#' @param axes Logical. If TRUE, axes are between 0 and 1.
+#' @return Grid plot.
+myHeatmap = function (mat, palette = "Teal", coln = 12, xlab = "", ylab = "", axes = FALSE)
+{
+  par(fig = c(0, 7/10, 0, 1))
+  image(mat, col = hcl.colors(length(mat), palette, rev = TRUE), axes = axes, xlab = xlab, ylab = ylab)
+  if(isFALSE(axes)) {
+    axis(1, seq(0, 1, length = nrow(mat)), rownames(mat))
+    axis(2, seq(0, 1, length = ncol(mat)), colnames(mat), las = 1)
+  }
+
+  # if (as == "i") {
+  #   axis(1, seq(0, 1, length = nrow(mat)), c(1:nrow(mat)),
+  #        tck = FALSE)
+  #   axis(2, seq(0, 1, length = ncol(mat)), c(1:ncol(mat)),
+  #        tck = FALSE)
+  # }
+
+  par(fig = c(7/10, 1, 0, 1), new = TRUE)
+  colvec = matrix(seq(min(mat), max(mat), length = coln))
+  image(t(colvec), col = hcl.colors(coln, palette, rev = TRUE), axes = FALSE)
+  axis(2, seq(0.0625, 1, length = 10/2), format(colvec[seq(2,
+                                                           10, 2)], digits = 3, nsmall = 2), las = 1)
+  par(fig = c(0, 1, 0, 1))
 }
 
 #' Performs scalling for matrix residualisation based on calculated coefficients.
@@ -112,10 +147,9 @@ cpev.fun = function(mat, matK) {
   return(cpev)
 
 }
-#' Performs matrix residualisation over estimated canonical vectors. There are
-#' three types: basic (subtracts scaled estimated latent variable from data),
-#' null (uses the null space of the estimated canonical vector to construct a
-#' new matrix) and LV (uses SVD to residualise).
+#' Performs matrix residualisation over estimated canonical vectors by
+#' using the null space of the estimated canonical vector to construct a
+#' new matrix.
 #'
 #' @param mat An nxp matrix.
 #' @param vec A vector of dimensions nxk.
@@ -194,6 +228,8 @@ CCAtStat = function(cancor, A, B, C = 0, type = c("CC", "Wilks", "Roy")) {
 #' \item{cancor_all}{Call canonical correlations calculated for each sparsity levels.}
 toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6), silent = FALSE)
 {
+
+  # checks
   if(ncol(B) <= max(nonzero_b)) {
     message("At least one of the nonzero options for B is not sparse. Changing to meet criteria")
     nonzeroB = nonzero_b[nonzero_b < ncol(B)]
@@ -203,6 +239,7 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
     message("At least one of the nonzero options for A is not sparse. Changing to meet criteria")
     nonzero_a = nonzero_a[nonzero_a < ncol(A)]
   }
+
 
   #Create the matrix A
   alpha = sapply(nonzero_a, function(x) c(alphaInit))
@@ -220,8 +257,9 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
 
 
     gamma =  A %*% alpha
-    dist = sqrt(colSums(gamma^2))
+    dist  = sqrt(colSums(gamma^2))
     gamma = sweep(gamma, 2, dist, "/")
+
 
     beta = t(B) %*% gamma
 
@@ -239,6 +277,7 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
     dist = sqrt(colSums(zeta^2))
     zeta = sweep(zeta, 2, dist, "/")
 
+
     alpha = t(A) %*% zeta
 
     alpha = apply(rbind(alpha,nonzero_a), 2, function(x)
@@ -251,8 +290,9 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
       sign(y) * tmp
     })
 
+
     if(length(nonzero_a) == 1) e = mean(abs(gamma - varTol1)) + mean(abs(zeta - varTol2))
-    if(length(nonzero_a) > 1) e = mean(colMeans(abs(gamma - varTol1))) + mean(colMeans(abs(zeta - varTol2)))
+    if(length(nonzero_a) > 1) e  = mean(colMeans(abs(gamma - varTol1))) + mean(colMeans(abs(zeta - varTol2)))
 
     textSCCA = paste0(" Common convergence error: ", round(e, 5), " & Iterations: ", i)
     if(isFALSE(silent) & (e<= tol || i > iter)) cat(textSCCA, "\r")
@@ -334,8 +374,7 @@ folds.toscca = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
         if(ncol(gamma) + ncol(zeta) > 2) canCor[f,]  = abs(sapply(1:ncol(gamma), function(j) cor(gamma[,j], zeta[,j])))
         if(ncol(gamma) + ncol(zeta) == 2) canCor[f,] = abs(cor(gamma, zeta))
 
-        # cat(canCor[1:k,], "\r")
-        # cat(table(s), "\r")
+
         if(any(is.na(canCor[f,]))) stop("oneis NA")
 
         if(f == folds) resultKFold <<- resultKFold
@@ -372,8 +411,7 @@ folds.toscca = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
       if(ncol(gamma) + ncol(zeta) > 2) canCor[f,]  = abs(sapply(1:ncol(gamma), function(j) cor(gamma[,j], zeta[,j])))
       if(ncol(gamma) + ncol(zeta) == 2) canCor[f,] = abs(cor(gamma, zeta))
 
-      # cat(canCor[1:k,], "\r")
-      # cat(table(s), "\r")
+
       if(any(is.na(canCor[f,]))) stop("oneis NA")
 
     }
@@ -473,6 +511,27 @@ folds.toscca = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
 #' @export
 toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "random", "uniform"), folds = 1, silent = FALSE, toPlot = TRUE, typeResid = "basic", combination = TRUE, parallel_logic = FALSE) {
 
+  # checks
+
+
+  if(K != length(nonzero_a)) {
+    if(K > 1 & length(nonzero_a) == 1) {
+      nonzero_a = rep(nonzero_a, K)
+    } else {
+      message("nonzero_a must have length 1 or K.")
+    }
+  }
+
+  if(K != length(nonzero_b)) {
+    if(K > 1 & length(nonzero_b) == 1) {
+      nonzero_b = rep(nonzero_b, K)
+    } else {
+      message("nonzero_b must have length 1 or K.")
+    }
+  }
+
+
+  # set up
   cancorComponents = matrix(NA, nrow = K, ncol = 1)
   alphaComponents  = matrix(NA, nrow = ncol(A), K)
   betaComponents   = matrix(NA, nrow = ncol(B), K)
