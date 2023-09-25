@@ -666,7 +666,6 @@ $$
 $$
  
  
- 
 ```{r}
 cpev_pma = sapply(1:K, function(k) cpev.fun(X, X%*%cca_pma$u[,1:k]))
 
@@ -678,6 +677,8 @@ auto_cor = data.frame(first_second = c(cor(cca_pma$u[,1] , cca_pma$u[,2]),
                                  cor(cca_toscca$alpha[,1], cca_toscca$alpha[,4])),
                       second_third = c(cor(cca_pma$u[,2] , cca_pma$u[,3]), 
                                  cor(cca_toscca$alpha[,2], cca_toscca$alpha[,3])), 
+                      second_fourth = c(cor(cca_pma$u[,2] , cca_pma$u[,4]), 
+                                 cor(cca_toscca$alpha[,2], cca_toscca$alpha[,4])), 
                       third_fourth = c(cor(cca_pma$u[,3] , cca_pma$u[,4]), 
                                  cor(cca_toscca$alpha[,3], cca_toscca$alpha[,4]))
 )

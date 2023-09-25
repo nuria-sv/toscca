@@ -6,9 +6,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of toscca is to find sparse canonical vectors maximally correlating two data sets. The number of nonzero variables must be stated beforehand. The descriptive algorithm can be seen below. 
-
-![alt text](https://github.com/nuria-sv/toscca/blob/master/algorithm.png)
+The goal of toscca is to …
 
 ## Installation
 
@@ -19,6 +17,8 @@ You can install the development version of toscca from
 # install.packages("devtools")
 devtools::install_github("nuria-sv/toscca")
 ```
+
+## Example
 
 This is a basic example which shows you how to reproduce the analysis
 described in “A framework for interpretation and testing of sparse
@@ -33,7 +33,7 @@ high-dimensional setting. That is, $$
 \text{where } n = 100, \text{ } p = 2500 \text{ and } q = 500.
 $$
 
-### Canonical Correlation Analysis
+## Canonical Correlation Analysis
 
 We use the method described in the paper, Thresholded Ordered Sparse
 Canonical Correlation Analysis (TOSCCA), to uncover the underlying
@@ -52,7 +52,7 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
 #>  For component K =  1 : 
 #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
 #> k-fold cv max. cancor 
-#>             0.9999112 
+#>             0.9999409 
 #> 
 #>  ........................................ 
 #>  # nonzero A: 100
@@ -65,9 +65,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 8 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 6 
     #> k-fold cv max. cancor 
-    #>             0.9805795 
+    #>             0.9826361 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -79,9 +79,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  3 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 10 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 13 
     #> k-fold cv max. cancor 
-    #>             0.9325936 
+    #>             0.9552778 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -93,9 +93,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  4 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.00049 & Iterations: 21 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.00686 & Iterations: 21 
     #> k-fold cv max. cancor 
-    #>             0.1114875 
+    #>             0.0177859 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -108,6 +108,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
 cpev_toscca = sapply(1:K, function(k) cpev.fun(X, X%*%cca_toscca$alpha[,1:k]))
 
 perm_toscca = perm.toscca(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor = cca_toscca$cancor)
+#> Warning: package 'EnvStats' was built under R version 4.3.0
+#> Warning in e$fun(obj, substitute(ex), parent.frame(), e$data): already
+#> exporting variable(s): K
 ```
 
 <img src="man/figures/README-toscca-5.png" width="100%" />
@@ -116,7 +119,7 @@ perm_toscca = perm.toscca(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor
     #> 0
     #> 0
     #> 0
-    #> 0.33
+    #> 0.81
     #> NULL
 
 We repeat the analysis using the Penalised Matrix Analysis approach from
@@ -130,8 +133,8 @@ cca_pma = CCA_pma_random(X, Y, K = 4, typex = "standard", typez = "standard", st
                          penaltyx = pma_lambda$bestpenaltyx, pma_lambda$bestpenaltyz)
 #> 123456789101112131415
 #> 123456789101112131415
-#> 123456789101112131415
-#> 123456789101112131415
+#> 12345678
+#> 1234
 ```
 
 <img src="man/figures/README-plots-1.png" width="100%" />
@@ -147,7 +150,7 @@ selected once the signal has been retrieved.
     #>  For component K =  1 : 
     #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
     #> k-fold cv max. cancor 
-    #>             0.9998522 
+    #>             0.9998642 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 10
@@ -156,9 +159,9 @@ selected once the signal has been retrieved.
     #> 
     #> __________________________________________ 
     #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 21 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 18 
     #> k-fold cv max. cancor 
-    #>             0.9452523 
+    #>             0.9150789 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 10
@@ -169,7 +172,7 @@ selected once the signal has been retrieved.
     #>  For component K =  1 : 
     #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
     #> k-fold cv max. cancor 
-    #>              0.999942 
+    #>             0.9999091 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 60
@@ -180,7 +183,7 @@ selected once the signal has been retrieved.
     #>  For component K =  2 : 
     #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 10 
     #> k-fold cv max. cancor 
-    #>             0.9625605 
+    #>              0.950906 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 60
@@ -191,7 +194,7 @@ selected once the signal has been retrieved.
     #>  For component K =  1 : 
     #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
     #> k-fold cv max. cancor 
-    #>             0.9999381 
+    #>             0.9999302 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 110
@@ -200,9 +203,9 @@ selected once the signal has been retrieved.
     #> 
     #> __________________________________________ 
     #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 17 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 15 
     #> k-fold cv max. cancor 
-    #>             0.9560377 
+    #>             0.9582509 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 110
@@ -211,9 +214,9 @@ selected once the signal has been retrieved.
     #> 
     #> __________________________________________ 
     #>  For component K =  1 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 5 
     #> k-fold cv max. cancor 
-    #>             0.9998549 
+    #>             0.9997974 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 160
@@ -222,9 +225,9 @@ selected once the signal has been retrieved.
     #> 
     #> __________________________________________ 
     #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 10 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 12 
     #> k-fold cv max. cancor 
-    #>             0.9407342 
+    #>             0.9551681 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 160
@@ -235,7 +238,7 @@ selected once the signal has been retrieved.
     #>  For component K =  1 : 
     #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
     #> k-fold cv max. cancor 
-    #>             0.9997678 
+    #>             0.9998029 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 210
@@ -246,7 +249,7 @@ selected once the signal has been retrieved.
     #>  For component K =  2 : 
     #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 11 
     #> k-fold cv max. cancor 
-    #>             0.9341117 
+    #>             0.9584947 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 210
@@ -257,7 +260,7 @@ selected once the signal has been retrieved.
     #>  For component K =  1 : 
     #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
     #> k-fold cv max. cancor 
-    #>             0.9997949 
+    #>              0.999756 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 260
@@ -266,9 +269,9 @@ selected once the signal has been retrieved.
     #> 
     #> __________________________________________ 
     #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.00155 & Iterations: 21 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 4e-05 & Iterations: 21 
     #> k-fold cv max. cancor 
-    #>             0.1725572 
+    #>             0.9198801 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 260
@@ -279,7 +282,7 @@ selected once the signal has been retrieved.
     #>  For component K =  1 : 
     #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
     #> k-fold cv max. cancor 
-    #>             0.9997038 
+    #>             0.9996817 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 310
@@ -288,9 +291,9 @@ selected once the signal has been retrieved.
     #> 
     #> __________________________________________ 
     #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.00232 & Iterations: 21 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 21 
     #> k-fold cv max. cancor 
-    #>             0.2124609 
+    #>             0.9325415 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 310
@@ -301,7 +304,7 @@ selected once the signal has been retrieved.
     #>  For component K =  1 : 
     #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
     #> k-fold cv max. cancor 
-    #>             0.9996146 
+    #>             0.9996376 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 360
@@ -310,9 +313,9 @@ selected once the signal has been retrieved.
     #> 
     #> __________________________________________ 
     #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 12 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 16 
     #> k-fold cv max. cancor 
-    #>             0.9458648 
+    #>             0.9292711 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 360
@@ -321,7 +324,7 @@ selected once the signal has been retrieved.
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
-### Cummulative percentage of explained variance (CPEV) and correlation between components.
+## Cummulative percentage of explained variance (CPEV) and correlation between components.
 
 AS discussed in the paper, a common measure to evaluated whether or not
 to compute another component is the CPEV, as seen in the equation below.
@@ -351,6 +354,8 @@ auto_cor = data.frame(first_second = c(cor(cca_pma$u[,1] , cca_pma$u[,2]),
                                  cor(cca_toscca$alpha[,1], cca_toscca$alpha[,4])),
                       second_third = c(cor(cca_pma$u[,2] , cca_pma$u[,3]), 
                                  cor(cca_toscca$alpha[,2], cca_toscca$alpha[,3])), 
+                      second_fourth = c(cor(cca_pma$u[,2] , cca_pma$u[,4]), 
+                                 cor(cca_toscca$alpha[,2], cca_toscca$alpha[,4])), 
                       third_fourth = c(cor(cca_pma$u[,3] , cca_pma$u[,4]), 
                                  cor(cca_toscca$alpha[,3], cca_toscca$alpha[,4]))
 )
@@ -414,6 +419,9 @@ first_fourth
 second_third
 </th>
 <th style="text-align:right;">
+second_fourth
+</th>
+<th style="text-align:right;">
 third_fourth
 </th>
 </tr>
@@ -424,19 +432,22 @@ third_fourth
 PMA
 </td>
 <td style="text-align:right;">
--0.0101010
+0.7381155
 </td>
 <td style="text-align:right;">
-0.6278225
+-0.4229563
 </td>
 <td style="text-align:right;">
--0.0101010
+0.4332640
 </td>
 <td style="text-align:right;">
-0.1227418
+-0.2408260
 </td>
 <td style="text-align:right;">
--0.0101010
+0.4146673
+</td>
+<td style="text-align:right;">
+-0.5310394
 </td>
 </tr>
 <tr>
@@ -444,19 +455,22 @@ PMA
 TOSCCA
 </td>
 <td style="text-align:right;">
--0.0217817
+-0.0154265
 </td>
 <td style="text-align:right;">
--0.0096114
+-0.0092960
 </td>
 <td style="text-align:right;">
--0.0045191
+0.0139717
 </td>
 <td style="text-align:right;">
--0.0040061
+-0.0044669
 </td>
 <td style="text-align:right;">
-0.0097445
+-0.0271798
+</td>
+<td style="text-align:right;">
+-0.0077076
 </td>
 </tr>
 </tbody>
@@ -486,16 +500,16 @@ Autocorrelation between components
 PMA
 </td>
 <td style="text-align:right;">
-0.0020653
+0.0016333
 </td>
 <td style="text-align:right;">
-0.0081771
+0.0017109
 </td>
 <td style="text-align:right;">
-0.0068477
+0.0017598
 </td>
 <td style="text-align:right;">
-0.0120499
+0.0018841
 </td>
 </tr>
 <tr>
@@ -503,16 +517,16 @@ PMA
 TOSCCA
 </td>
 <td style="text-align:right;">
-0.0072966
+0.0058611
 </td>
 <td style="text-align:right;">
-0.0082782
+0.0065404
 </td>
 <td style="text-align:right;">
-0.0090524
+0.0071267
 </td>
 <td style="text-align:right;">
-0.0095376
+0.0077242
 </td>
 </tr>
 </tbody>
