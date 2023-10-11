@@ -6,7 +6,9 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of toscca is to …
+The goal of toscca is to find sparse canonical vectors maximally correlating two data sets. The number of nonzero variables must be stated beforehand. The descriptive algorithm can be seen below. 
+ 
+![alt text](https://github.com/nuria-sv/toscca/blob/master/algorithm.png)
 
 ## Installation
 
