@@ -18,7 +18,10 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of toscca is to ...
+The goal of toscca is to find sparse canonical vectors maximally correlating two data sets. The number of nonzero variables must be stated beforehand. The descriptive algorithm can be seen below. 
+
+ 
+![alt text](https://github.com/nuria-sv/toscca/blob/master/algorithm.png)
 
 ## Installation
 
@@ -50,6 +53,7 @@ library(foreach)
 
 ## Simulations
 We simulate data for 3 underlying signals of different size on a high-dimensional setting. That is, 
+
 $$
 \mathbf{X} \in \mathbb{R}^{n\times p} \quad \text{and} \quad \mathbf{Y}\in \mathbb{R}^{n\times q}, 
 \\
