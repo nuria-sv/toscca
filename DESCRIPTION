@@ -6,6 +6,7 @@ Authors@R:
            comment = c(ORCID = "0000-0002-1004-5785"))
 Description: Performs Thresholded Ordered Sparse Caonical Correlation Analysis (TOSCCA): a sparse 
             Canonical Correlation Analaysis described in Senar et. al (n.d).
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
