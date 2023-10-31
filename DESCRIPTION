@@ -1,10 +1,11 @@
 Package: toscca
-Title: What the Package Does (One Line, Title Case)
+Title: Thresholded Ordered Sparse Canonical Correlation Analysis
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    person("Nuria", "Senar", , "n.senarvilladeamigo@amsterdamumc.nl", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-1004-5785"))
+Description: Performs Thresholded Ordered Sparse Caonical Correlation Analysis (TOSCCA): a sparse 
+            Canonical Correlation Analaysis described in Senar et. al (n.d).
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
