@@ -324,7 +324,7 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
 #' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
 #' \item{cancor}{Max. canonical correlation estimate.}
 #' \item{nonzero_a,nonzero_b}{Optimal nonzero values for each canonical vector.}
-folds.toscca = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL) {
+toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL) {
   N = nrow(A) # observations
   p = ncol(A) # predictor variables (not really since CCA is symmetric)
   q = ncol(B) # response variables (not really since CCA is symmetric)
@@ -553,12 +553,12 @@ toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ra
       Eb = standardVar(Eb)
     }
     if(combination) {
-      result = folds.toscca(A = Ea, B = Eb, nonzero_a, nonzero_b, alpha_init, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
+      result = toscca.folds(A = Ea, B = Eb, nonzero_a, nonzero_b, alpha_init, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
 
     } else {
       nonzero_aK = nonzero_a[k]
       nonzero_bK = nonzero_b[k]
-      result = folds.toscca(A = Ea, B = Eb, nonzero_aK, nonzero_bK, alpha_init, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
+      result = toscca.folds(A = Ea, B = Eb, nonzero_aK, nonzero_bK, alpha_init, folds, silent = silent, toPlot = toPlot, ATest_res = A, BTest_res = B, parallel_logic = parallel_logic)
 
     }
 
@@ -738,7 +738,7 @@ boostrapCCA = function(A, B, nonzero_a, nonzero_b, cancor, folds = 10, n = 100, 
       ASample = A[s, ]
       BSample = B[s, ]
       data    = list(ASample, BSample)
-      t[i] = CCAtStat(folds.toscca(A, B, alpha_init = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)
+      t[i] = CCAtStat(toscca.folds(A, B, alpha_init = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)
 
     }
 
@@ -749,7 +749,7 @@ boostrapCCA = function(A, B, nonzero_a, nonzero_b, cancor, folds = 10, n = 100, 
       ASample = A[s, ]
       BSample = B[s, ]
       data    = list(ASample, ASample)
-      t[i] = CCAtStat(folds.toscca(A, B, alpha_init = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, XSample, Y, C = nuisanceVar, type = testStatType)
+      t[i] = CCAtStat(toscca.folds(A, B, alpha_init = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, XSample, Y, C = nuisanceVar, type = testStatType)
 
 
     }
