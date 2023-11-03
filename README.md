@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# toscca ![alt text](https://github.com/nuria-sv/toscca/blob/master/logo.png%7Cwidth=100)
+# toscca <img src="https://github.com/nuria-sv/toscca/blob/master/logo.png" height="132" width="110" align="right">
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -62,7 +62,7 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
 #>  For component K =  1 : 
 #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
 #> k-fold cv max. cancor 
-#>             0.9999401 
+#>             0.9999249 
 #> 
 #>  ........................................ 
 #>  # nonzero A: 100
@@ -75,9 +75,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 8 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 21 
     #> k-fold cv max. cancor 
-    #>             0.9731477 
+    #>             0.9559014 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -89,9 +89,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  3 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.06292 & Iterations: 21 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 9 
     #> k-fold cv max. cancor 
-    #>             0.8167324 
+    #>             0.9521481 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -103,9 +103,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  4 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.00392 & Iterations: 21 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.00051 & Iterations: 21 
     #> k-fold cv max. cancor 
-    #>             0.1737521 
+    #>            0.01651148 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -129,7 +129,7 @@ perm_toscca = perm.toscca(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor
     #> 0
     #> 0
     #> 0
-    #> 0.11
+    #> 0.84
     #> NULL
 
 We repeat the analysis using the Penalised Matrix Analysis approach from
@@ -142,8 +142,8 @@ pma_lambda = PMA::CCA.permute(X, Y, typex = "standard", typez = "standard")
 cca_pma = CCA_pma_random(X, Y, K = 4, typex = "standard", typez = "standard", start = "uniform", 
                          penaltyx = pma_lambda$bestpenaltyx, pma_lambda$bestpenaltyz)
 #> 123456789101112131415
-#> 123456789101112131415
-#> 123456789101112131415
+#> 123
+#> 123
 #> 123456789101112131415
 ```
 
@@ -274,22 +274,22 @@ third_fourth
 PMA
 </td>
 <td style="text-align:right;">
--0.0101011
+-0.4214488
 </td>
 <td style="text-align:right;">
-0.6804174
+0.4565216
 </td>
 <td style="text-align:right;">
-0.2203809
+0.6622558
 </td>
 <td style="text-align:right;">
-0.2026621
+-0.5530660
 </td>
 <td style="text-align:right;">
-0.2176857
+0.0437713
 </td>
 <td style="text-align:right;">
--0.0101011
+0.0444798
 </td>
 </tr>
 <tr>
@@ -297,22 +297,22 @@ PMA
 TOSCCA
 </td>
 <td style="text-align:right;">
--0.0258203
+-0.0125906
 </td>
 <td style="text-align:right;">
--0.0175785
+-0.0155583
 </td>
 <td style="text-align:right;">
--0.0045745
+0.0142427
 </td>
 <td style="text-align:right;">
--0.0042009
+-0.0041775
 </td>
 <td style="text-align:right;">
--0.0001680
+0.0135298
 </td>
 <td style="text-align:right;">
-0.0014768
+0.0105085
 </td>
 </tr>
 </tbody>
@@ -342,16 +342,16 @@ Autocorrelation between components
 PMA
 </td>
 <td style="text-align:right;">
-0.0020427
+0.0019497
 </td>
 <td style="text-align:right;">
-0.0080874
+0.0030997
 </td>
 <td style="text-align:right;">
-0.0058155
+0.0043297
 </td>
 <td style="text-align:right;">
-0.0080599
+0.0027699
 </td>
 </tr>
 <tr>
@@ -359,16 +359,16 @@ PMA
 TOSCCA
 </td>
 <td style="text-align:right;">
-0.0069455
+0.0069950
 </td>
 <td style="text-align:right;">
-0.0080674
+0.0078226
 </td>
 <td style="text-align:right;">
-0.0085392
+0.0087342
 </td>
 <td style="text-align:right;">
-0.0090909
+0.0093479
 </td>
 </tr>
 </tbody>
