@@ -18,9 +18,14 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of toscca is to find sparse canonical vectors maximally correlating two data sets. The number of nonzero variables must be stated beforehand. The descriptive algorithm can be seen below. 
+## Overview
+toscca is an R package to perform Thresholded Ordered Sparse Canonical Correlation Analysis (TOSCCA), descibed in [(Senar N. et al. nd)](https://arxiv.org/abs/2310.02169) for the analysis and integration of two datasets, at least one of which is high-dimensional. TOSCCA is an extension of the sparse CCA method based on soft-thresholding that produces near-orthogonal
+components, allows for browsing over various sparsity levels, and permutation-based hypothesis testing. Our
+soft-thresholding approach avoids tuning of a penalty parameter, which is computationally burdensome
+and may render unintelligible results. In addition, unlike alternative approaches, our method is less dependent
+on the initialisation. 
 
- 
+
  <img src="https://github.com/nuria-sv/toscca/blob/master/algorithm.png" height="380" width="700" align="center">
 
 ## Installation
