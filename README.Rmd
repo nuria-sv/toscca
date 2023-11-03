@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# toscca
+# toscca ![alt text](https://github.com/nuria-sv/toscca/blob/master/logo.png)
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -619,7 +619,8 @@ beta = matrix(NA, nrow = ncol(Y), ncol = length(nonz_y))
 cancor = rep(NA, 10)
 
 for (i in 1:length(nonz_x)) {
-  cca_res =  toscca::toscca(X, Y, K = 2, nonzero_a = rep(nonz_x[i],2), nonzero_b = c(50,nonz_y), combination = FALSE, toPlot = FALSE, alpha_init = "uniform")
+  cca_res =  toscca::toscca(X, Y, K = 2, nonzero_a = rep(nonz_x[i],2), nonzero_b = c(50,nonz_y),
+                            combination = FALSE, toPlot = FALSE, alpha_init = "uniform", silent = TRUE)
   alpha[,i] =cca_res$alpha[,1]
   beta[,i] = cca_res$beta[,1]
   cancor[i] = cca_res$cancor[1]
@@ -694,7 +695,7 @@ adj_cpev_pma    = c(cpev_pma[1],
                     sapply(2:K, function(k) cpev_pma[k]*prod(1-abs(auto_cor[1,k-1:k]))))
 
 plot(t(auto_cor[2,]), type = "b", pch = 19, col = "deepskyblue", xlab = "Correlation to first component", ylab = "Autocorrelation", xaxt = "n", yaxt="n", ylim = c(-1,1), lty = 1)
-axis(1, at=1:length(colnames(auto_cor)), lab=colnames(auto_cor), las=TRUE)
+axis(1, at=1:length(colnames(auto_cor)), lab=colnames(auto_cor), las=0, cex.axis = 0.7)
 axis(2, at=pretty(c(-1,1)), lab=pretty(c(-1,1)), las=TRUE)
 grid(nx = NULL, ny = NULL, lty = 2, col = alpha("lightgray", 0.4),lwd = 2) 
 points(t(auto_cor[1,]), type = "b", pch = 15, col = "tomato", lty = 2)

@@ -1,15 +1,20 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# toscca
+# toscca ![alt text](https://github.com/nuria-sv/toscca/blob/master/logo.png)
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of toscca is to find sparse canonical vectors maximally correlating two data sets. The number of nonzero variables must be stated beforehand. The descriptive algorithm can be seen below. 
+The goal of toscca is to find sparse canonical vectors maximally
+correlating two data sets. The number of nonzero variables must be
+stated beforehand. The descriptive algorithm can be seen below.
 
- 
-![alt text](https://github.com/nuria-sv/toscca/blob/master/algorithm.png)
+<figure>
+<img src="https://github.com/nuria-sv/toscca/blob/master/algorithm.png"
+alt="alt text" />
+<figcaption aria-hidden="true">alt text</figcaption>
+</figure>
 
 ## Installation
 
@@ -57,7 +62,7 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
 #>  For component K =  1 : 
 #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
 #> k-fold cv max. cancor 
-#>             0.9999237 
+#>             0.9999577 
 #> 
 #>  ........................................ 
 #>  # nonzero A: 100
@@ -70,9 +75,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 7 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 8 
     #> k-fold cv max. cancor 
-    #>             0.9697013 
+    #>              0.962987 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -84,9 +89,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  3 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.00177 & Iterations: 21 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 13 
     #> k-fold cv max. cancor 
-    #>            0.07092859 
+    #>             0.9506083 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -98,9 +103,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  4 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 13 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.0015 & Iterations: 21 
     #> k-fold cv max. cancor 
-    #>             0.9583823 
+    #>              0.278803 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -113,7 +118,7 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
 cpev_toscca = sapply(1:K, function(k) cpev.fun(X, X%*%cca_toscca$alpha[,1:k]))
 
 perm_toscca = perm.toscca(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor = cca_toscca$cancor)
-#> Warning: package 'EnvStats' was built under R version 4.3.0
+#> Warning: package 'EnvStats' was built under R version 4.3.1
 #> Warning in e$fun(obj, substitute(ex), parent.frame(), e$data): already
 #> exporting variable(s): K
 ```
@@ -123,8 +128,8 @@ perm_toscca = perm.toscca(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor
     #> Empirical p-values:
     #> 0
     #> 0
-    #> 0.47
     #> 0
+    #> 0.02
     #> NULL
 
 We repeat the analysis using the Penalised Matrix Analysis approach from
@@ -150,182 +155,14 @@ making up the signal are repeatedly selected with a higher frequency
 than the noise variables. The implication being that noise variable are
 selected once the signal has been retrieved.
 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  1 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
-    #> k-fold cv max. cancor 
-    #>             0.9999175 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 10
-    #>  # nonzero B: 50
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 16 
-    #> k-fold cv max. cancor 
-    #>             0.9274649 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 10
-    #>  # nonzero B: 10
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  1 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
-    #> k-fold cv max. cancor 
-    #>             0.9999551 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 60
-    #>  # nonzero B: 50
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 17 
-    #> k-fold cv max. cancor 
-    #>             0.9164311 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 60
-    #>  # nonzero B: 10
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  1 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
-    #> k-fold cv max. cancor 
-    #>             0.9999266 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 110
-    #>  # nonzero B: 50
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 20 
-    #> k-fold cv max. cancor 
-    #>             0.9535667 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 110
-    #>  # nonzero B: 10
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  1 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
-    #> k-fold cv max. cancor 
-    #>             0.9999043 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 160
-    #>  # nonzero B: 50
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.00034 & Iterations: 21 
-    #> k-fold cv max. cancor 
-    #>             0.1801637 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 160
-    #>  # nonzero B: 10
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  1 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 5 
-    #> k-fold cv max. cancor 
-    #>              0.999607 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 210
-    #>  # nonzero B: 50
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 2e-04 & Iterations: 21 
-    #> k-fold cv max. cancor 
-    #>              0.917689 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 210
-    #>  # nonzero B: 10
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  1 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
-    #> k-fold cv max. cancor 
-    #>              0.999601 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 260
-    #>  # nonzero B: 50
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 18 
-    #> k-fold cv max. cancor 
-    #>             0.9139329 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 260
-    #>  # nonzero B: 10
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  1 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
-    #> k-fold cv max. cancor 
-    #>             0.9996736 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 310
-    #>  # nonzero B: 50
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 13 
-    #> k-fold cv max. cancor 
-    #>              0.890896 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 310
-    #>  # nonzero B: 10
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  1 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
-    #> k-fold cv max. cancor 
-    #>             0.9996814 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 360
-    #>  # nonzero B: 50
-    #>  ........................................ 
-    #> 
-    #> __________________________________________ 
-    #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 5e-04 & Iterations: 21 
-    #> k-fold cv max. cancor 
-    #>             0.0789554 
-    #> 
-    #>  ........................................ 
-    #>  # nonzero A: 360
-    #>  # nonzero B: 10
-    #>  ........................................
+    #> nonzero_b must have length 1 or K.
+    #> nonzero_b must have length 1 or K.
+    #> nonzero_b must have length 1 or K.
+    #> nonzero_b must have length 1 or K.
+    #> nonzero_b must have length 1 or K.
+    #> nonzero_b must have length 1 or K.
+    #> nonzero_b must have length 1 or K.
+    #> nonzero_b must have length 1 or K.
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
@@ -372,7 +209,7 @@ adj_cpev_pma    = c(cpev_pma[1],
                     sapply(2:K, function(k) cpev_pma[k]*prod(1-abs(auto_cor[1,k-1:k]))))
 
 plot(t(auto_cor[2,]), type = "b", pch = 19, col = "deepskyblue", xlab = "Correlation to first component", ylab = "Autocorrelation", xaxt = "n", yaxt="n", ylim = c(-1,1), lty = 1)
-axis(1, at=1:length(colnames(auto_cor)), lab=colnames(auto_cor), las=TRUE)
+axis(1, at=1:length(colnames(auto_cor)), lab=colnames(auto_cor), las=0, cex.axis = 0.7)
 axis(2, at=pretty(c(-1,1)), lab=pretty(c(-1,1)), las=TRUE)
 grid(nx = NULL, ny = NULL, lty = 2, col = alpha("lightgray", 0.4),lwd = 2) 
 points(t(auto_cor[1,]), type = "b", pch = 15, col = "tomato", lty = 2)
@@ -440,19 +277,19 @@ PMA
 -0.0101011
 </td>
 <td style="text-align:right;">
--0.0098659
+0.6846167
 </td>
 <td style="text-align:right;">
-0.7515935
+-0.0101010
 </td>
 <td style="text-align:right;">
-0.6394067
+0.1780978
 </td>
 <td style="text-align:right;">
-0.0678320
+0.4156298
 </td>
 <td style="text-align:right;">
-0.0594177
+-0.0101009
 </td>
 </tr>
 <tr>
@@ -460,22 +297,22 @@ PMA
 TOSCCA
 </td>
 <td style="text-align:right;">
--0.0177197
+-0.0187682
 </td>
 <td style="text-align:right;">
--0.0049691
+-0.0126792
 </td>
 <td style="text-align:right;">
--0.0072203
+-0.0066643
 </td>
 <td style="text-align:right;">
--0.0071963
+-0.0122695
 </td>
 <td style="text-align:right;">
--0.0054718
+-0.0014649
 </td>
 <td style="text-align:right;">
-0.0019562
+0.0826146
 </td>
 </tr>
 </tbody>
@@ -505,16 +342,16 @@ Autocorrelation between components
 PMA
 </td>
 <td style="text-align:right;">
-0.0018742
+0.0020453
 </td>
 <td style="text-align:right;">
-0.0074206
+0.0080977
 </td>
 <td style="text-align:right;">
-0.0165313
+0.0057463
 </td>
 <td style="text-align:right;">
-0.0073005
+0.0101120
 </td>
 </tr>
 <tr>
@@ -522,16 +359,16 @@ PMA
 TOSCCA
 </td>
 <td style="text-align:right;">
-0.0068203
+0.0075722
 </td>
 <td style="text-align:right;">
-0.0072914
+0.0086735
 </td>
 <td style="text-align:right;">
-0.0079135
+0.0094215
 </td>
 <td style="text-align:right;">
-0.0086260
+0.0097991
 </td>
 </tr>
 </tbody>
