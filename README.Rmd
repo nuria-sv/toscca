@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# toscca ![alt text](https://github.com/nuria-sv/toscca/blob/master/logo.png)
+# toscca ![alt text](https://github.com/nuria-sv/toscca/blob/master/logo.png|width=100)
 
 <!-- badges: start -->
 <!-- badges: end -->

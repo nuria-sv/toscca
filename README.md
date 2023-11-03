@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# toscca ![alt text](https://github.com/nuria-sv/toscca/blob/master/logo.png)
+# toscca ![alt text](https://github.com/nuria-sv/toscca/blob/master/logo.png%7Cwidth=100)
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -62,7 +62,7 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
 #>  For component K =  1 : 
 #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
 #> k-fold cv max. cancor 
-#>             0.9999577 
+#>             0.9999401 
 #> 
 #>  ........................................ 
 #>  # nonzero A: 100
@@ -77,7 +77,7 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #>  For component K =  2 : 
     #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 8 
     #> k-fold cv max. cancor 
-    #>              0.962987 
+    #>             0.9731477 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -89,9 +89,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  3 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 13 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.06292 & Iterations: 21 
     #> k-fold cv max. cancor 
-    #>             0.9506083 
+    #>             0.8167324 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -103,9 +103,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  4 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.0015 & Iterations: 21 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.00392 & Iterations: 21 
     #> k-fold cv max. cancor 
-    #>              0.278803 
+    #>             0.1737521 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -129,7 +129,7 @@ perm_toscca = perm.toscca(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor
     #> 0
     #> 0
     #> 0
-    #> 0.02
+    #> 0.11
     #> NULL
 
 We repeat the analysis using the Penalised Matrix Analysis approach from
@@ -277,19 +277,19 @@ PMA
 -0.0101011
 </td>
 <td style="text-align:right;">
-0.6846167
+0.6804174
 </td>
 <td style="text-align:right;">
--0.0101010
+0.2203809
 </td>
 <td style="text-align:right;">
-0.1780978
+0.2026621
 </td>
 <td style="text-align:right;">
-0.4156298
+0.2176857
 </td>
 <td style="text-align:right;">
--0.0101009
+-0.0101011
 </td>
 </tr>
 <tr>
@@ -297,22 +297,22 @@ PMA
 TOSCCA
 </td>
 <td style="text-align:right;">
--0.0187682
+-0.0258203
 </td>
 <td style="text-align:right;">
--0.0126792
+-0.0175785
 </td>
 <td style="text-align:right;">
--0.0066643
+-0.0045745
 </td>
 <td style="text-align:right;">
--0.0122695
+-0.0042009
 </td>
 <td style="text-align:right;">
--0.0014649
+-0.0001680
 </td>
 <td style="text-align:right;">
-0.0826146
+0.0014768
 </td>
 </tr>
 </tbody>
@@ -342,16 +342,16 @@ Autocorrelation between components
 PMA
 </td>
 <td style="text-align:right;">
-0.0020453
+0.0020427
 </td>
 <td style="text-align:right;">
-0.0080977
+0.0080874
 </td>
 <td style="text-align:right;">
-0.0057463
+0.0058155
 </td>
 <td style="text-align:right;">
-0.0101120
+0.0080599
 </td>
 </tr>
 <tr>
@@ -359,16 +359,16 @@ PMA
 TOSCCA
 </td>
 <td style="text-align:right;">
-0.0075722
+0.0069455
 </td>
 <td style="text-align:right;">
-0.0086735
+0.0080674
 </td>
 <td style="text-align:right;">
-0.0094215
+0.0085392
 </td>
 <td style="text-align:right;">
-0.0097991
+0.0090909
 </td>
 </tr>
 </tbody>
