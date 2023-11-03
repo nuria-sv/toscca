@@ -9,16 +9,16 @@
 ## Overview
 
 toscca is an R package to perform Thresholded Ordered Sparse Canonical
-Correlation Analysis (TOSCCA), descibed in [(Senar N. et
-al. nd)](https://arxiv.org/abs/2310.02169) for the analysis and
-integration of two datasets, at least one of which is high-dimensional.
-TOSCCA is an extension of the sparse CCA method based on
-soft-thresholding that produces near-orthogonal components, allows for
-browsing over various sparsity levels, and permutation-based hypothesis
-testing. Our soft-thresholding approach avoids tuning of a penalty
-parameter, which is computationally burdensome and may render
-unintelligible results. In addition, unlike alternative approaches, our
-method is less dependent on the initialisation.
+Correlation Analysis (TOSCCA), descibed in [(Senar N. et al,
+nd)](https://arxiv.org/abs/2310.02169) for the analysis and integration
+of two datasets, at least one of which is high-dimensional. TOSCCA is an
+extension of the sparse CCA method based on soft-thresholding that
+produces near-orthogonal components, allows for browsing over various
+sparsity levels, and permutation-based hypothesis testing. Our
+soft-thresholding approach avoids tuning of a penalty parameter, which
+is computationally burdensome and may render unintelligible results. In
+addition, unlike alternative approaches, our method is less dependent on
+the initialisation.
 
 <img src="https://github.com/nuria-sv/toscca/blob/master/algorithm.png" height="380" width="700" align="center">
 
@@ -68,7 +68,7 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
 #>  For component K =  1 : 
 #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
 #> k-fold cv max. cancor 
-#>             0.9999163 
+#>             0.9998833 
 #> 
 #>  ........................................ 
 #>  # nonzero A: 100
@@ -81,9 +81,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 11 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 8 
     #> k-fold cv max. cancor 
-    #>             0.9774014 
+    #>             0.9856169 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -95,9 +95,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  3 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.00034 & Iterations: 21 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 13 
     #> k-fold cv max. cancor 
-    #>            0.01692739 
+    #>              0.958347 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -109,9 +109,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  4 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.01612 & Iterations: 21 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.01261 & Iterations: 21 
     #> k-fold cv max. cancor 
-    #>             0.1546782 
+    #>            0.01185424 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -134,8 +134,8 @@ perm_toscca = perm.toscca(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor
     #> Empirical p-values:
     #> 0
     #> 0
-    #> 0.89
-    #> 0.18
+    #> 0
+    #> 0.94
     #> NULL
 
 We repeat the analysis using the Penalised Matrix Analysis approach from
@@ -280,22 +280,22 @@ third_fourth
 PMA
 </td>
 <td style="text-align:right;">
-0.7209013
+-0.0101010
 </td>
 <td style="text-align:right;">
-0.1783154
-</td>
-<td style="text-align:right;">
-0.0078330
+0.7326632
 </td>
 <td style="text-align:right;">
 -0.0101011
 </td>
 <td style="text-align:right;">
--0.0101010
+0.1415566
 </td>
 <td style="text-align:right;">
--0.0101010
+0.5237875
+</td>
+<td style="text-align:right;">
+0.1047993
 </td>
 </tr>
 <tr>
@@ -303,22 +303,22 @@ PMA
 TOSCCA
 </td>
 <td style="text-align:right;">
--0.0145025
+-0.0181952
 </td>
 <td style="text-align:right;">
--0.0134124
+-0.0068438
 </td>
 <td style="text-align:right;">
--0.0072027
+0.0314987
 </td>
 <td style="text-align:right;">
--0.0060141
+-0.0032353
 </td>
 <td style="text-align:right;">
--0.0014893
+0.0005936
 </td>
 <td style="text-align:right;">
-0.0518036
+0.0051317
 </td>
 </tr>
 </tbody>
@@ -348,16 +348,16 @@ Autocorrelation between components
 PMA
 </td>
 <td style="text-align:right;">
-0.0015574
+0.0018900
 </td>
 <td style="text-align:right;">
-0.0017387
+0.0074828
 </td>
 <td style="text-align:right;">
-0.0032143
+0.0045011
 </td>
 <td style="text-align:right;">
-0.0056692
+0.0079209
 </td>
 </tr>
 <tr>
@@ -365,16 +365,16 @@ PMA
 TOSCCA
 </td>
 <td style="text-align:right;">
-0.0053155
+0.0065348
 </td>
 <td style="text-align:right;">
-0.0069711
+0.0073446
 </td>
 <td style="text-align:right;">
-0.0076497
+0.0079662
 </td>
 <td style="text-align:right;">
-0.0079886
+0.0086440
 </td>
 </tr>
 </tbody>
