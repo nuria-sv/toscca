@@ -9,7 +9,7 @@
 ## Overview
 
 toscca is an R package to perform Thresholded Ordered Sparse Canonical
-Correlation Analysis (TOSCCA), descibed in[(Senar N. et al,
+Correlation Analysis (TOSCCA), descibed in [(Senar N. et al,
 2024)](https://doi.org/10.1093/bioadv/vbae021) for the analysis and integration
 of two datasets, at least one of which is high-dimensional. TOSCCA is an
 extension of the sparse CCA method based on soft-thresholding that
