@@ -1,3 +1,6 @@
 ^toscca\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
+^LICENSE\.md$
+^CRAN-SUBMISSION$
+^cran-comments\.md$

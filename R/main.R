@@ -1,9 +1,10 @@
+
 #' Performs eigen decomposition of a matrix in PS space.
 #'
 #'
 #' @param A A square matrix nxn.
 #' @return Matrix. Positive definite matrix.
-eigenDecompostion = function(A) {
+fastEigen = function(A) {
   if(nrow(A) != ncol(A)) stop("Matrix should be square.")
 
   e = eigen(A)
@@ -20,11 +21,40 @@ eigenDecompostion = function(A) {
 #' @param A An nxp matrix.
 #' @param B An nxq matrix.
 #' @return An pzp vector.
+#' @examples
+#' #sample size etc
+#' N = 10
+#' p = 25
+#' q = 5
+#' # noise
+#' X0 = sapply(1:p, function(x) rnorm(N))
+#' Y0 = sapply(1:q, function(x) rnorm(N))
+#'
+#' colnames(X0) = paste0("x", 1:p)
+#' colnames(Y0) = paste0("y", 1:q)
+#'
+#' # signal
+#' Z1 = rnorm(N,0,1)
+#'
+#'
+#' #Some associations with the true signal
+#' alpha = (6:10) / 10
+#' beta  = -(2:3) / 10
+#'
+#' loc_alpha = 1:length(alpha)
+#' loc_beta  = 1:length(beta)
+#'
+#' for(j in 1:length(alpha))
+#'   X0[, loc_alpha[j]] =  alpha[j] * Z1 + rnorm(N,0,0.3)
+#'
+#' for(j in 1:length(beta))
+#'   Y0[, loc_beta[j]] =  beta[j] * Z1 + rnorm(N,0,0.3)
+#' cv = initialiseCanVar(X0, Y0)
 #' @export
 initialiseCanVar = function(A, B) {
   bbt = B%*%t(B) # positive definite matrix
   # A%*%t(A) is symmetric
-  E   = eigenDecompostion(bbt)
+  E   = fastEigen(bbt)
   H   = t(A)%*%E
 
   H_sdv  = svd(H)
@@ -35,39 +65,7 @@ initialiseCanVar = function(A, B) {
 }
 
 
-#' Plots grid of CC over threshold penalty
-#'
-#'
-#' @param mat A square matrix nxm.
-#' @param pallette Character. Name of pallette colour. Default is Teal.
-#' @param coln Integer. Grid length parameter.
-#' @param xlab Character. Label for x axis.
-#' @param ylab Character. Label for y axis.
-#' @param axes Logical. If TRUE, axes are between 0 and 1.
-#' @return Grid plot.
-myHeatmap = function (mat, palette = "Teal", coln = 12, xlab = "", ylab = "", axes = FALSE)
-{
-  par(fig = c(0, 7/10, 0, 1))
-  image(mat, col = hcl.colors(length(mat), palette, rev = TRUE), axes = axes, xlab = xlab, ylab = ylab)
-  if(isFALSE(axes)) {
-    axis(1, seq(0, 1, length = nrow(mat)), rownames(mat))
-    axis(2, seq(0, 1, length = ncol(mat)), colnames(mat), las = 1)
-  }
 
-  # if (as == "i") {
-  #   axis(1, seq(0, 1, length = nrow(mat)), c(1:nrow(mat)),
-  #        tck = FALSE)
-  #   axis(2, seq(0, 1, length = ncol(mat)), c(1:ncol(mat)),
-  #        tck = FALSE)
-  # }
-
-  par(fig = c(7/10, 1, 0, 1), new = TRUE)
-  colvec = matrix(seq(min(mat), max(mat), length = coln))
-  image(t(colvec), col = hcl.colors(coln, palette, rev = TRUE), axes = FALSE)
-  axis(2, seq(0.0625, 1, length = 10/2), format(colvec[seq(2,
-                                                           10, 2)], digits = 3, nsmall = 2), las = 1)
-  par(fig = c(0, 1, 0, 1))
-}
 
 #' Performs scalling for matrix residualisation based on calculated coefficients.
 #'
@@ -104,7 +102,7 @@ residualisation = function(mat, vec, spaceMat = NULL, type = c("LV", "null", "ba
 
   }
   if(type == "null") {
-    require(mcompanion)
+    # require(mcompanion)
     vec_null  = mcompanion::null_complement(vec, universe = spaceMat, na.allow = na.allow)
     vec_com   = cbind(vec, vec_null)
     mat_res = mat%*%vec_com
@@ -129,24 +127,7 @@ residualisation = function(mat, vec, spaceMat = NULL, type = c("LV", "null", "ba
 
 }
 
-#' Calculated cummulative percentage of explained variance.
-#'
-#' @param mat An nxp matrix.
-#' @param maxK An nxk matrix. Each column corresponds to a latent variable.
-#' @return Scalar.
-#' @export
-cpev.fun = function(mat, matK) {
-  var_mat = t(mat)%*%mat
-  traceX  = sum(rowSums(var_mat))
 
-  var_matK = t(matK)%*%matK
-  traceK   = sum(rowSums(var_matK))
-
-  cpev = traceK/traceX
-
-  return(cpev)
-
-}
 #' Performs matrix residualisation over estimated canonical vectors by
 #' using the null space of the estimated canonical vector to construct a
 #' new matrix.
@@ -173,7 +154,7 @@ getCanSubspace = function(mat, vec) {
 #' @param type Character. Choice of statistic: Canonical correlation, Wilks'statistic or Roy's statistic.
 #' @return Statistic
 #' @export
-CCAtStat = function(cancor, A, B, C = 0, type = c("CC", "Wilks", "Roy")) {
+toscca.tStat = function(cancor, A, B, C = 0, type = c("CC", "Wilks", "Roy")) {
   N = nrow(A)
   p = ncol(A)
   q = ncol(B)
@@ -221,11 +202,7 @@ CCAtStat = function(cancor, A, B, C = 0, type = c("CC", "Wilks", "Roy")) {
 #' @param tol Numeric. Tolerance threshold. Default is 10^6.
 #' @param silent Logical. If FALSE, a progress bar will appear on the console. Default is FALSE.
 #' @return a list with the following elements:
-#' \itemize{
-#' \item{alpha}{Canonical vector for matrix \deqn{\mathbf{A}}, for each combination of sparsity value specified.}
-#' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
-#' \item{cancor}{Max. canonical correlation estimate.}
-#' \item{cancor_all}{Call canonical correlations calculated for each sparsity levels.}
+
 toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6), silent = FALSE)
 {
 
@@ -312,18 +289,22 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
 
 #' Sparse Canonical Correlation Analysis. Computation of CC via NIPALS with soft thresholding.
 #'
-#' @param alphaInit Character. Type initialisation for \deqn{\mathbf{\alpha}}. Default is "eigen".
+#' @param alpha_init Character. Type initialisation for \deqn{\mathbf{\alpha}}. Default is "eigen".
 #' @param A,B Data matrices.
 #' @param nonzero_a,nonzero_b Numeric. Scalar or vector over the number of nonzeroes allowed for a correlation estimate.
-#' @param iter Numeric. Maximum number of iterations. Default is 20.
-#' @param tol Numeric. Tolerance threshold. Default is 10^6.
 #' @param silent Logical. If FALSE, a progress bar will appear on the console. Default is FALSE.
+#' @param folds Integer. Indicates number of folds to perform.
+#' @param parallel_logic Logical. TRUE to parallelise folds. Default is FALSE.
+#' @param silent Logical. TRUE to keep silent output messages. Default is FALSE.
+#' @param toPlot Logical. TRUE to plot results.
+#' @param ATest_res NULL. Keep NULL.
+#' @param BTest_res NULL. Keep NULL.
+#' @importFrom foreach foreach
+#' @importFrom stats rnorm
+#' @importFrom graphics matplot
+#' @importFrom graphics title
 #' @return a list with the following elements:
-#' \itemize{
-#' \item{alpha}{Canonical vector for matrix \deqn{\mathbf{A}}, for each combination of sparsity value specified.}
-#' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
-#' \item{cancor}{Max. canonical correlation estimate.}
-#' \item{nonzero_a,nonzero_b}{Optimal nonzero values for each canonical vector.}
+
 toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL) {
   N = nrow(A) # observations
   p = ncol(A) # predictor variables (not really since CCA is symmetric)
@@ -434,6 +415,7 @@ toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
                " # nonzero B: ", nonzeroGrid[select, 2],
                "\n ........................................ \n"))
   }
+  mat = matrix(canCor, nrow = length(nonzero_a), ncol = length(nonzero_b))
 
   if(toPlot & nrow(nonzeroGrid) > 1) {
     mat = matrix(canCor, nrow = length(nonzero_a), ncol = length(nonzero_b))
@@ -490,8 +472,6 @@ toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
 
 #' Sparse Canonical Correlation Analysis. Computation of CC via NIPALS with soft thresholding.
 #'
-#' @description This function performs CCA on matrices \deqn{\mathbf{A}} and \deqn{\mathbf{B}} via Non-Iterative PArtial Least Squares (NIPALS) algorithm
-#' imposing sparsity over a fixed number of variables especified.
 #' @param A,B Data matrices.
 #' @param nonzero_a,nonzero_b Numeric. Scalar or vector over the number of nonzeroes allowed for a correlation estimate.
 #' @param K Numeric. Number of components to be computed.
@@ -502,19 +482,52 @@ toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
 #' @param typeResid Character. Choice of residualisation technique. Options are basic (default), null and LV.
 #' @param combination Logical. If TRUE, the algorithm will search for the best combination of sparsity choice nonzero_a and nonzero_b for each component. This should be used for exploratory analysis. Default is FALSE.
 #' @param parallel_logic Logical. If TRUE, cross-validation is done in parallel.Default is FALSE.
-#' @details For a exploratory analysis nonzero_a and nonzero_b can be vectors. The algorithm will then search for the best combination of sparsity choice nonzero_a and nonzero_b for each component.
 #' @return a list with the following elements:
-#' \itemize{
-#' \item{alpha}{Canonical vector for matrix \deqn{\mathbf{A}}, for each combination of sparsity value specified.}
-#' \item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
-#' \item{cancor}{Max. canonical correlation estimate.}
+#' @examples
+#' #sample size etc
+#' N = 10
+#' p = 25
+#' q = 5
+#' # noise
+#' X0 = sapply(1:p, function(x) rnorm(N))
+#' Y0 = sapply(1:q, function(x) rnorm(N))
+#'
+#' colnames(X0) = paste0("x", 1:p)
+#' colnames(Y0) = paste0("y", 1:q)
+#'
+#' # signal
+#' Z1 = rnorm(N,0,1)
+#'
+#'
+#' #Some associations with the true signal
+#' alpha = (6:10) / 10
+#' beta  = -(2:3) / 10
+#'
+#' loc_alpha = 1:length(alpha)
+#' loc_beta  = 1:length(beta)
+#'
+#' for(j in 1:length(alpha))
+#'   X0[, loc_alpha[j]] =  alpha[j] * Z1 + rnorm(N,0,0.3)
+#'
+#' for(j in 1:length(beta))
+#'   Y0[, loc_beta[j]] =  beta[j] * Z1 + rnorm(N,0,0.3)
+#'
+# performa toscca
+#' X = standardVar(X0)
+#' Y = standardVar(Y0)
+#' K = 2                                       # number of components to be estimated
+#' nonz_x = c(2,5, 10, 20)                     # number of nonzero variables for X
+#' nonz_y = c(1, 2, 3, 4)                      # number of nonzero variables for Y
+#' init   = "uniform"                          # type of initialisation
+#' cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init, silent = TRUE, toPlot = FALSE)
+#'
 #' @export
 toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "random", "uniform"), folds = 1, silent = FALSE, toPlot = TRUE, typeResid = "basic", combination = TRUE, parallel_logic = FALSE) {
 
   # checks
 
 
-  if(K != length(nonzero_a)) {
+  if(K != length(nonzero_a) & isFALSE(combination)) {
     if(K > 1 & length(nonzero_a) == 1) {
       nonzero_a = rep(nonzero_a, K)
     } else {
@@ -522,7 +535,7 @@ toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ra
     }
   }
 
-  if(K != length(nonzero_b)) {
+  if(K != length(nonzero_b)& isFALSE(combination)) {
     if(K > 1 & length(nonzero_b) == 1) {
       nonzero_b = rep(nonzero_b, K)
     } else {
@@ -588,6 +601,7 @@ toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ra
 #' @description This function performs permutation testing on CC estimates.
 #' @param A,B Data matrices.
 #' @param nonzero_a,nonzero_b Numeric. Scalar or vector over the number of nonzeroes allowed for a correlation estimate.
+#' @param alpha_init Character. Type initialisation for \deqn{\mathbf{\alpha}}. Default is "eigen".
 #' @param K Numeric. Number of components to be computed.
 #' @param draws Numeric. Number of permutations for each component.
 #' @param folds Numeric. Number of folds for the cross-validation process.
@@ -597,12 +611,52 @@ toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ra
 #' @param parallel_logic Logical. If TRUE, cross-validation is done in parallel.Default is FALSE.
 #' @param nuisanceVar Data with nuisance variables. For statistic type.
 #' @param testStatType Character. Choice of statistic. Options are CC (default), Wilks and Roy.
-#' @param combination Logical. If TRUE, the algorithm will search for the best combination of sparsity choice nonzero_a and nonzero_b for each component. This should be used for exploratory analysis. Default is FALSE.
+#' @importFrom foreach foreach
+#' @importFrom EnvStats  epdfPlot
 #' @details For a exploratory analysis nonzero_a and nonzero_b can be vectors. The algorithm will then search for the best combination of sparsity choice nonzero_a and nonzero_b for each component.
 #' @return Matrix with permutation estimates.
+#' @examples
+#' #sample size etc
+#' N = 10
+#' p = 25
+#' q = 5
+#' # noise
+#' X0 = sapply(1:p, function(x) rnorm(N))
+#' Y0 = sapply(1:q, function(x) rnorm(N))
+#'
+#' colnames(X0) = paste0("x", 1:p)
+#' colnames(Y0) = paste0("y", 1:q)
+#'
+#' # signal
+#' Z1 = rnorm(N,0,1)
+#'
+#'
+#' #Some associations with the true signal
+#' alpha = (6:10) / 10
+#' beta  = -(2:3) / 10
+#'
+#' loc_alpha = 1:length(alpha)
+#' loc_beta  = 1:length(beta)
+#'
+#' for(j in 1:length(alpha))
+#'   X0[, loc_alpha[j]] =  alpha[j] * Z1 + rnorm(N,0,0.3)
+#'
+#' for(j in 1:length(beta))
+#'   Y0[, loc_beta[j]] =  beta[j] * Z1 + rnorm(N,0,0.3)
+#'
+# performa toscca
+#' X = standardVar(X0)
+#' Y = standardVar(Y0)
+#' K = 2                                       # number of components to be estimated
+#' nonz_x = c(2,5, 10, 20)                     # number of nonzero variables for X
+#' nonz_y = c(1, 2, 3, 4)                      # number of nonzero variables for Y
+#' init   = "uniform"                          # type of initialisation
+#' cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init, silent = TRUE, toPlot = FALSE)
+#' \dontrun{
+#' perm_toscca = toscca.perm(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor = cca_toscca$cancor)
+#' }
 #' @export
-perm.toscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "random", "uniform"), folds = 1, toPlot = FALSE, draws = 20, cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC") {
-  require(EnvStats)
+toscca.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "random", "uniform"), folds = 1, toPlot = FALSE, draws = 20, cancor, silent = TRUE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC") {
 
   perm = matrix(NA, nrow = draws, ncol = K)
 
@@ -616,7 +670,7 @@ perm.toscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "r
       if(isFALSE(silent)) progressBar(draws, d)
 
       ASample = A[sample(1:nrow(A), nrow(A)),]
-      t(CCAtStat(toscca(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE, parallel_logic = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]) #off-sample cancor
+      t(toscca.tStat(toscca(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE, parallel_logic = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]) #off-sample cancor
 
     }
 
@@ -625,7 +679,7 @@ perm.toscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "r
       # cat("|", rep(".", d), rep(" ", (draws-d)), "|", (d/draws)*100, "%\r")
       if(isFALSE(silent)) progressBar(draws, d)
       ASample = A[sample(1:nrow(A), nrow(A)),]
-      perm[d,] = CCAtStat(toscca(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]] #off-sample cancor
+      perm[d,] = toscca.tStat(toscca(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]] #off-sample cancor
 
 
     }
@@ -636,10 +690,9 @@ perm.toscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "r
 
 
   margin = 0.05
-  testStatistic = CCAtStat(cancor, A, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]
+  testStatistic = toscca.tStat(cancor, A, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]
   h =  hist(perm[, getWhich(testStatistic, max)], breaks = draws/2, plot = FALSE)
 
-  if(is.null(bootCCA)) {
     permDensity = density(perm[, getWhich(testStatistic, max)])
 
     xlim = c(min(min(perm) - margin, testStatistic - margin), max(max(perm) + margin, testStatistic + margin))
@@ -649,37 +702,13 @@ perm.toscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "r
     hist(perm[, getWhich(testStatistic, max)], breaks = draws/2, xlab = "Canonical Correlation",
          xlim = xlim, ylim =  ylim, main = paste0("Distribution under de Null - ", testStatType, " Statistic") , col =  scales::alpha("#01768c", 0.2))
     lines(permDensity, col="black", lwd = 2)
-    EnvStats::epdfPlot(perm[,getWhich(testStatistic, max)], discrete = FALSE, density.arg.list = NULL, plot.it = TRUE,
+    epdfPlot(perm[,getWhich(testStatistic, max)], discrete = FALSE, density.arg.list = NULL, plot.it = TRUE,
              add = TRUE, epdf.col = "steelblue", epdf.lwd = 3 * par("cex"), epdf.lty = 1,
              curve.fill = FALSE, curve.fill.col = "steelblue", main = NULL, xlab = NULL, ylab = NULL)
     abline(v=testStatistic, col = "#e86d07", lwd = 2)
     legend("topleft", c("Empirical pdf", "density", "model canCor"), col = c("steelblue", "black", "red"), lty=c(2, 1, 1), cex=0.8)
     text(x = as.character(testStatistic), y = 0.9*par('usr')[4], labels = as.character(1:K), cex = 0.9)
 
-
-  } else {
-    li = bootCCA$ccaInterval[1]
-    ui = bootCCA$ccaInterval[2]
-
-    xlim = c(min(min(perm) - margin, modelCanCor - margin, li - margin), max(max(perm) + margin, modelCanCor + margin, ui + margin))
-    li = bootCCA$ccaInterval[1]
-    ui = bootCCA$ccaInterval[2]
-
-    xlim = c(min(min(perm) - margin, modelCanCor - margin), max(max(perm) + margin, modelCanCor + margin))
-    permDensity = density(perm[, getWhich(testStatistic, max)])
-
-    par(mfrow=c(1,1))
-    hist(perm[, getWhich(testStatistic, max)], breaks = draws/2, xlab = "Canonical Correlation", xlim = xlim, ylim =  sort(modes(permDensity)$y), main = paste0("Distribution under de Null - ", testStatType, " Statistic") , col = "#93D9D9")
-    lines(permDensity, col="black", lwd = 2)
-    # lines(seq(xlim[1], xlim[2], 0.01), dnorm(seq(xlim[1], xlim[2], 0.01), mean(perm[, getWhich(modelCanCor, max)]), sd(perm[, getWhich(modelCanCor, max)])), col="steelblue", lwd = 2, lty = 4)
-    lines(x = c(li, li), y = c(max(histNullCCA$density)*0.5/2, max(histNullCCA$density)*0.6/2))
-    lines(x = c(ui, ui), y = c(max(histNullCCA$density)*0.5/2, max(histNullCCA$density)*0.6/2))
-    lines(x = c(li, ui), y = rep((max(histNullCCA$density)*0.5/2 + max(histNullCCA$density)*0.6/2)/2, 2))
-    abline(v = modelCanCor, col = "purple", lwd = 2)
-    abline(v=mean(bootCCA$boostCanCor), col = "red", lwd = 2)
-    legend("topleft", c("normal", "density", "model canCor", "bootstrap avg canCor"), col = c("steelblue", "black", "purple", "red"), lty=c(2, 2, 1, 1), cex=0.8)
-    text(x = as.character(testStatistic), y = 0.9*par('usr')[4], labels = as.character(1:K), cex = 0.9)
-  }
 
   pValues = sapply(1:K, function (k) round(mean(testStatistic[k]<=(perm[, getWhich(testStatistic, max)])), 6))
 
@@ -690,7 +719,7 @@ perm.toscca = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "r
 }
 
 
-latentVariable <- function(data, alpha, beta) {
+toscca.lv <- function(data, alpha, beta) {
   X = data[[1]]
   Y = data[[2]]
   gamma  = matrix(X%*%alpha, nrow = nrow(X))
@@ -698,84 +727,5 @@ latentVariable <- function(data, alpha, beta) {
   cancor = cor(gamma, zeta)
 
   return(cancor)
-}
-
-#' Bootstrap to get empirical intervals of canonical correlation.
-#'
-#' @param A,B Data matrices.
-#' @param nonzero_a,nonzero_b Numeric. Scalar or vector over the number of nonzeroes allowed for a correlation estimate.
-#' @param K Numeric. Number of components to be computed.
-#' @param draws Numeric. Number of permutations for each component.
-#' @param folds Numeric. Number of folds for the cross-validation process.
-#' @param n Numeric. Times of bootstrapping.
-#' @param ci_quant Numeric. Between 0 and 1. quantile of intervale.
-#' @param silent Logical. If FALSE, a progress bar will appear on the console. Default is FALSE.
-#' @param toPlot Logical. If TRUE, plot will be generated automatically showing the estimated canonical weights. Default is TRUE.
-#' @param cancor Numeric. Scalar or vector: anonical correlation estimate(s).
-#' @param parallel_logic Logical. If TRUE, cross-validation is done in parallel.Default is FALSE.
-#' @param nuisanceVar Data with nuisance variables. For statistic type.
-#' @param testStatType Character. Choice of statistic. Options are CC (default), Wilks and Roy.
-#' @details For a exploratory analysis nonzero_a and nonzero_b can be vectors. The algorithm will then search for the best combination of sparsity choice nonzero_a and nonzero_b for each component.
-#' @return Matrix with permutation estimates.
-#' @export
-boostrapCCA = function(A, B, nonzero_a, nonzero_b, cancor, folds = 10, n = 100, ci_quant = 0.01, silent = TRUE, toPlot = FALSE, parallel_logic = TRUE, nuisanceVar = 0, testStatType = "CC") {
-  N = nrow(A)
-  p = ncol(A)
-  q = ncol(B)
-
-  t = rep(NA, n)
-
-  if(isTRUE(parallel_logic)) {
-    # create env
-    myCluster <- parallel::makeCluster(parallel::detectCores() - 1, type = "PSOCK")
-    doParallel::registerDoParallel(cl = myCluster)
-    if(isFALSE(foreach::getDoParRegistered())) stop("DoPar not registered. Check cores")
-
-    t <- foreach(i = 1:n, .combine = "c", .export = ls(globalenv())) %dopar% {
-      if(isFALSE(silent)) progressBar(n, i)
-
-      s       = sample(1:N, N, replace = TRUE)
-      ASample = A[s, ]
-      BSample = B[s, ]
-      data    = list(ASample, BSample)
-      t[i] = CCAtStat(toscca.folds(A, B, alpha_init = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)
-
-    }
-
-  } else {
-    for(i in 1:n) {
-      if(isFALSE(silent)) progressBar(n, i)
-      s       = sample(1:N, N, replace = TRUE)
-      ASample = A[s, ]
-      BSample = B[s, ]
-      data    = list(ASample, ASample)
-      t[i] = CCAtStat(toscca.folds(A, B, alpha_init = "eigen", nonzero_a = nonzero_a, nonzero_b = nonzero_b, folds = folds, silent = TRUE, toPlot = FALSE)$cancor, XSample, Y, C = nuisanceVar, type = testStatType)
-
-
-    }
-  }
-
-  parallel::stopCluster(cl = myCluster)
-
-
-  d = t - cancor
-  d = sort(d)
-  d_quant = quantile(d, c(ci_quant, 1 - ci_quant))
-  ci = cancor + d_quant
-
-  if(toPlot) {
-    par(mfrow =c(1, 1))
-    plot(t, ylim = c(min(0.5, min(t)), 1), col = "grey")
-    abline(h=cancor, col = "royalblue", lwd=2)
-    abline(h=ci[1], col = "red", lwd=2, lty = 2)
-    abline(h=ci[2], col = "red", lwd=2, lty = 2)
-    abline(h=mean(t), col = "purple", lwd=2, lty = 3)
-    legend("bottomright",  c("CI", "bootstrap canCor", "model canCor"), col = c("red", "purple", "royalblue"), lty=c(2, 3, 1), cex=0.8)
-
-  }
-
-  ciList = list(boostCanCor = t,
-                ccaQuant = d_quant,
-                ccaInterval = ci)
 }
 

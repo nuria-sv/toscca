@@ -1,12 +1,36 @@
 Package: toscca
-Title: Thresholded Ordered Sparse Canonical Correlation Analysis
-Version: 0.0.0.9000
+Title: Thresholded Sparse CCA
+Version: 0.1.0
 Authors@R: 
-    person("Nuria", "Senar", email = "n.senarvilladeamigo@amsterdamumc.nl", role = c("aut", "cre"),
+    person("Nuria", "Senar", , "n.senarvilladeamigo@amsterdamumc.nl", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1004-5785"))
-Description: Performs Thresholded Ordered Sparse Caonical Correlation Analysis (TOSCCA): a sparse 
-            Canonical Correlation Analaysis described in Senar et. al (n.d).
+Description: Performs Thresholded Ordered Sparse CCA. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.3
+Suggests:
+    ClusterR,
+    RColorBrewer,
+    cluster,
+    knitr,
+    rmarkdown
+Imports:
+    devtools,
+    doParallel,
+    foreach,
+    parallel,
+    forecast,
+    ggplot2,
+    lme4,
+    scales,
+    graphics,
+    stats,
+    utils, 
+    grDevices, 
+    mcompanion, 
+    EnvStats, 
+    MASS
+Depends: 
+    R (>= 3.5)
+VignetteBuilder: knitr

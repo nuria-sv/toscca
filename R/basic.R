@@ -15,29 +15,6 @@ progressBar <- function(end, round) {
 
 }
 
-modes = function(d) {
-  i <- which(diff(sign(diff(d$y))) < 0 ) + 1
-  data.frame(x = d$x[i], y = d$y[i])
-}
-
-numToBi = function(data) {
-  r = nrow(data)
-  c = ncol(data)
-
-  logicalMatrix = matrix(data != 0, nrow = r, ncol = c)
-  binaryMatrix  = matrix(as.numeric(logicalMatrix), nrow = r, ncol = c)
-
-  binaryMatrix
-}
-
-
-getWhich = function(data, fun) {
-  fun = match.fun(fun)
-
-  position = (which(data == fun(data)))
-
-  position
-}
 
 
 #' Stardardise a matrix
@@ -45,10 +22,42 @@ getWhich = function(data, fun) {
 #' This function stardardises a matrix or a vector and gives the option to
 #' centre or normalise (only vectors).
 #'
-#' @param X Matrix or vector to be standardise.
+#' @param mat Matrix or vector to be standardise.
 #' @param centre Logical, if true, cetre to mean zero.
 #' @param normalise Logical, if true, performs vector normalisation.
 #' @return A matrix or vector with the preferred standardarisation
+#' @examples
+#' #sample size etc
+#' N = 10
+#' p = 25
+#' q = 5
+#' # noise
+#' X0 = sapply(1:p, function(x) rnorm(N))
+#' Y0 = sapply(1:q, function(x) rnorm(N))
+#'
+#' colnames(X0) = paste0("x", 1:p)
+#' colnames(Y0) = paste0("y", 1:q)
+#'
+#' # signal
+#' Z1 = rnorm(N,0,1)
+#'
+#'
+#' #Some associations with the true signal
+#' alpha = (6:10) / 10
+#' beta  = -(2:3) / 10
+#'
+#' loc_alpha = 1:length(alpha)
+#' loc_beta  = 1:length(beta)
+#'
+#' for(j in 1:length(alpha))
+#'   X0[, loc_alpha[j]] =  alpha[j] * Z1 + rnorm(N,0,0.3)
+#'
+#' for(j in 1:length(beta))
+#'   Y0[, loc_beta[j]] =  beta[j] * Z1 + rnorm(N,0,0.3)
+#'
+# performa toscca
+#' X = standardVar(X0)
+#' Y = standardVar(Y0)
 #' @export
 
 standardVar = function(mat, centre = TRUE, normalise = FALSE) {
@@ -100,12 +109,11 @@ standardVar = function(mat, centre = TRUE, normalise = FALSE) {
 #' @param mat A square matrix nxn.
 #' @param vec A vector of dimensions nx1.
 #' @param tol Convergence criterion. Default is 10^(-6).
-#' @param matIter Maximum iterations. Default is 500.
+#' @param maxIter Maximum iterations. Default is 500.
 #' @param silent Logical. If TRUE, convergence performance will be printed.
 #' @return List: vec: eigen vector; lambda: eigen value; t: total iterations.
-#' @export
 powerMethod = function(mat, vec, tol = 10^(-6), maxIter = 500, silent = TRUE) {
-  vec = matrix((vec/norm(v, "2")), ncol = 1)
+  vec = matrix((vec/norm(vec, "2")), ncol = 1)
   e = 10
   t = 1
 
@@ -125,7 +133,7 @@ powerMethod = function(mat, vec, tol = 10^(-6), maxIter = 500, silent = TRUE) {
     if(isFALSE(silent)) cat("Iterations ", t - 1, "with error: ", e, "      \r")
   }
 
-  return(list(v = vec,
+  return(list(vec = vec,
               lambda = lambda,
               iterations = t))
 }

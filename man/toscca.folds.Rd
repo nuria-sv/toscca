@@ -23,21 +23,22 @@ toscca.folds(
 
 \item{nonzero_a, nonzero_b}{Numeric. Scalar or vector over the number of nonzeroes allowed for a correlation estimate.}
 
-\item{silent}{Logical. If FALSE, a progress bar will appear on the console. Default is FALSE.}
+\item{alpha_init}{Character. Type initialisation for \deqn{\mathbf{\alpha}}. Default is "eigen".}
 
-\item{alphaInit}{Character. Type initialisation for \deqn{\mathbf{\alpha}}. Default is "eigen".}
+\item{folds}{Integer. Indicates number of folds to perform.}
 
-\item{iter}{Numeric. Maximum number of iterations. Default is 20.}
+\item{parallel_logic}{Logical. TRUE to parallelise folds. Default is FALSE.}
 
-\item{tol}{Numeric. Tolerance threshold. Default is 10^6.}
+\item{silent}{Logical. TRUE to keep silent output messages. Default is FALSE.}
+
+\item{toPlot}{Logical. TRUE to plot results.}
+
+\item{ATest_res}{NULL. Keep NULL.}
+
+\item{BTest_res}{NULL. Keep NULL.}
 }
 \value{
 a list with the following elements:
-\itemize{
-\item{alpha}{Canonical vector for matrix \deqn{\mathbf{A}}, for each combination of sparsity value specified.}
-\item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
-\item{cancor}{Max. canonical correlation estimate.}
-\item{nonzero_a,nonzero_b}{Optimal nonzero values for each canonical vector.}
 }
 \description{
 Sparse Canonical Correlation Analysis. Computation of CC via NIPALS with soft thresholding.

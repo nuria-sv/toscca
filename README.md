@@ -62,13 +62,13 @@ K = 4                                       # number of components to be estimat
 nonz_x = rep(100, K)                        # number of nonzero variables for X
 nonz_y = rep(100, K)                        # number of nonzero variables for Y
 init   = "uniform"                          # type of initialisation
-cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
+cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
 #> 
 #> __________________________________________ 
 #>  For component K =  1 : 
 #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 4 
 #> k-fold cv max. cancor 
-#>             0.9998833 
+#>             0.9999466 
 #> 
 #>  ........................................ 
 #>  # nonzero A: 100
@@ -81,9 +81,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  2 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 8 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 9 
     #> k-fold cv max. cancor 
-    #>             0.9856169 
+    #>             0.9706823 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -95,9 +95,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  3 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 13 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0 & Iterations: 14 
     #> k-fold cv max. cancor 
-    #>              0.958347 
+    #>             0.9181017 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -109,9 +109,9 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
     #> 
     #> __________________________________________ 
     #>  For component K =  4 : 
-    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.01261 & Iterations: 21 
+    #> | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  | 100 %          Common convergence error: 0.01821 & Iterations: 21 
     #> k-fold cv max. cancor 
-    #>            0.01185424 
+    #>             0.1844584 
     #> 
     #>  ........................................ 
     #>  # nonzero A: 100
@@ -124,7 +124,6 @@ cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
 cpev_toscca = sapply(1:K, function(k) cpev.fun(X, X%*%cca_toscca$alpha[,1:k]))
 
 perm_toscca = perm.toscca(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor = cca_toscca$cancor)
-#> Warning: package 'EnvStats' was built under R version 4.3.1
 #> Warning in e$fun(obj, substitute(ex), parent.frame(), e$data): already
 #> exporting variable(s): K
 ```
@@ -135,7 +134,7 @@ perm_toscca = perm.toscca(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor
     #> 0
     #> 0
     #> 0
-    #> 0.94
+    #> 0.17
     #> NULL
 
 We repeat the analysis using the Penalised Matrix Analysis approach from
@@ -246,83 +245,12 @@ kable(
   )
 ```
 
-<table>
-<caption>
+|        | first_second | first_third | first_fourth | second_third | second_fourth | third_fourth |
+|:-------|-------------:|------------:|-------------:|-------------:|--------------:|-------------:|
+| PMA    |   -0.0101010 |   0.7069568 |   -0.2151539 |    0.0346192 |     0.0100014 |   -0.3398326 |
+| TOSCCA |   -0.0131597 |  -0.0130300 |   -0.0022242 |   -0.0063520 |    -0.0067584 |   -0.0056898 |
+
 Autocorrelation between components
-</caption>
-<thead>
-<tr>
-<th style="text-align:left;">
-</th>
-<th style="text-align:right;">
-first_second
-</th>
-<th style="text-align:right;">
-first_third
-</th>
-<th style="text-align:right;">
-first_fourth
-</th>
-<th style="text-align:right;">
-second_third
-</th>
-<th style="text-align:right;">
-second_fourth
-</th>
-<th style="text-align:right;">
-third_fourth
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-PMA
-</td>
-<td style="text-align:right;">
--0.0101010
-</td>
-<td style="text-align:right;">
-0.7326632
-</td>
-<td style="text-align:right;">
--0.0101011
-</td>
-<td style="text-align:right;">
-0.1415566
-</td>
-<td style="text-align:right;">
-0.5237875
-</td>
-<td style="text-align:right;">
-0.1047993
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-TOSCCA
-</td>
-<td style="text-align:right;">
--0.0181952
-</td>
-<td style="text-align:right;">
--0.0068438
-</td>
-<td style="text-align:right;">
-0.0314987
-</td>
-<td style="text-align:right;">
--0.0032353
-</td>
-<td style="text-align:right;">
-0.0005936
-</td>
-<td style="text-align:right;">
-0.0051317
-</td>
-</tr>
-</tbody>
-</table>
 
 ``` r
 
@@ -338,44 +266,9 @@ kable(
   )
 ```
 
-<table>
-<caption>
+|        |           |           |           |           |
+|:-------|----------:|----------:|----------:|----------:|
+| PMA    | 0.0019351 | 0.0076611 | 0.0050515 | 0.0060542 |
+| TOSCCA | 0.0068149 | 0.0073004 | 0.0079377 | 0.0081198 |
+
 Autocorrelation between components
-</caption>
-<tbody>
-<tr>
-<td style="text-align:left;">
-PMA
-</td>
-<td style="text-align:right;">
-0.0018900
-</td>
-<td style="text-align:right;">
-0.0074828
-</td>
-<td style="text-align:right;">
-0.0045011
-</td>
-<td style="text-align:right;">
-0.0079209
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-TOSCCA
-</td>
-<td style="text-align:right;">
-0.0065348
-</td>
-<td style="text-align:right;">
-0.0073446
-</td>
-<td style="text-align:right;">
-0.0079662
-</td>
-<td style="text-align:right;">
-0.0086440
-</td>
-</tr>
-</tbody>
-</table>

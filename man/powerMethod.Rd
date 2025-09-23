@@ -13,9 +13,9 @@ powerMethod(mat, vec, tol = 10^(-6), maxIter = 500, silent = TRUE)
 
 \item{tol}{Convergence criterion. Default is 10^(-6).}
 
-\item{silent}{Logical. If TRUE, convergence performance will be printed.}
+\item{maxIter}{Maximum iterations. Default is 500.}
 
-\item{matIter}{Maximum iterations. Default is 500.}
+\item{silent}{Logical. If TRUE, convergence performance will be printed.}
 }
 \value{
 List: vec: eigen vector; lambda: eigen value; t: total iterations.

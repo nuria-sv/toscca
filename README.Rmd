@@ -16,6 +16,9 @@ knitr::opts_chunk$set(
 # toscca <img src="https://github.com/nuria-sv/toscca/blob/master/logo.png" height="132" width="110" align="right">
 
 <!-- badges: start -->
+![Status: Finished](https://img.shields.io/badge/status-finished-brightgreen) 
+![Build Status](https://github.com/nuria-sv/toscca-mm/actions/workflows/r.yml/badge.svg) 
+![License](https://img.shields.io/github/license/nuria-sv/tosccamm)
 <!-- badges: end -->
 
 ## Overview
@@ -133,7 +136,7 @@ K = 4                                       # number of components to be estimat
 nonz_x = rep(100, K)                        # number of nonzero variables for X
 nonz_y = rep(100, K)                        # number of nonzero variables for Y
 init   = "uniform"                          # type of initialisation
-cca_toscca  = toscca::toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
+cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, init, combination = FALSE)
 cpev_toscca = sapply(1:K, function(k) cpev.fun(X, X%*%cca_toscca$alpha[,1:k]))
 
 perm_toscca = perm.toscca(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor = cca_toscca$cancor)
@@ -677,7 +680,7 @@ $$
  
  
 ```{r}
-cpev_pma = sapply(1:K, function(k) cpev.fun(X, X%*%cca_pma$u[,1:k]))
+cpev_pma = sapply(1:K, function(k) cpev.fun(X, cca_pma$u[,1:k]))
 
 auto_cor = data.frame(first_second = c(cor(cca_pma$u[,1] , cca_pma$u[,2]), 
                                  cor(cca_toscca$alpha[,1], cca_toscca$alpha[,2])), 
