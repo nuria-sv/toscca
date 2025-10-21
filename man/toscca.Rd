@@ -42,6 +42,8 @@ toscca(
 }
 \value{
 a list with the following elements:
+
+List with estimated toscca parameters.
 }
 \description{
 Sparse Canonical Correlation Analysis. Computation of CC via NIPALS with soft thresholding.

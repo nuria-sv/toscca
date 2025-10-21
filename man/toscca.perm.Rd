@@ -18,7 +18,8 @@ toscca.perm(
   silent = TRUE,
   parallel_logic = TRUE,
   nuisanceVar = 0,
-  testStatType = "CC"
+  testStatType = "CC",
+  ncores = NULL
 )
 }
 \arguments{
@@ -45,9 +46,13 @@ toscca.perm(
 \item{nuisanceVar}{Data with nuisance variables. For statistic type.}
 
 \item{testStatType}{Character. Choice of statistic. Options are CC (default), Wilks and Roy.}
+
+\item{ncores}{numeric. Number of cores to use in parallelisation. Default is detectCores() -1.}
 }
 \value{
 Matrix with permutation estimates.
+
+List with permuted correlations and p-values.
 }
 \description{
 This function performs permutation testing on CC estimates.
@@ -91,7 +96,9 @@ nonz_x = c(2,5, 10, 20)                     # number of nonzero variables for X
 nonz_y = c(1, 2, 3, 4)                      # number of nonzero variables for Y
 init   = "uniform"                          # type of initialisation
 cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init, silent = TRUE, toPlot = FALSE)
-\dontrun{
-perm_toscca = toscca.perm(X, Y, nonz_x, nonz_y, K = K, init, draws = 100, cancor = cca_toscca$cancor)
+\donttest{
+#dont run due to parallelisation.
+cc = cca_toscca$cancor
+perm_toscca = toscca.perm(X, Y, nonz_x, nonz_y, K = K, init, draws = 10, cancor = cc, ncores = 2)
 }
 }
