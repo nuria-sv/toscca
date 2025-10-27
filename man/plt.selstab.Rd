@@ -36,8 +36,64 @@ No return value, called for selection stability pot.
 This function plots cv for different thresholds
 }
 \examples{
+\donttest{
 # example code
-\dontrun{
-plt.selstab(object,X, Y)
+#sample size etc
+N = 10
+p = 25
+q = 5
+X0 = list()
+Y0 = list()
+
+#Some associations with the true signal
+cwa = (6:10) / 10
+cwb  = -(2:3) / 10
+
+alpha = rep(0, p)
+beta = rep(0, q)
+
+loc_alpha = sample(1:p, length(cwa))
+loc_beta  = sample(1:q, length(cwb))
+
+alpha[loc_alpha] = cwa
+beta[loc_beta] = cwb
+
+sg = matrix(c(1, 0.6, 0.3, rep(0, 2),
+              0.6, 1, 0.6, 0.3, rep(0, 1),
+              0.3, 0.6, 1, 0.6, 0.3,
+              rep(0,1), 0.3, 0.6, 1, 0.6,
+              rep(0,2), 0.3, 0.6, 1), ncol = 5)
+for(i in 1:N)
+{
+  times = 1:5
+  Zi1 = (sin(100*times))^times +   times * 0.65 +rnorm(1,0,0.95)
+  Zi = cbind(Zi1)
+  #Simulate data and add some noise
+  X0i = sapply(1:p, function(a) MASS::mvrnorm(1, (Zi \%*\% t(alpha))[,a], Sigma = sg))
+  Y0i = sapply(1:q, function(a) MASS::mvrnorm(1, (Zi \%*\% t(beta))[,a], Sigma = sg))
+
+  colnames(X0i) = paste0("X", 1:ncol(X0i))
+  colnames(Y0i) = paste0("Y", 1:ncol(Y0i))
+  #Check the simulated cross correlation
+  #image(cor(X0i, Y0i))
+
+  #Remove some observations
+  # p_observed = 1
+  X0i = cbind(id=i, time=times, X0i)#[rbinom(length(times),1,p_observed)==1,]
+  Y0i = cbind(id=i, time=times, Y0i)#[rbinom(length(times),1,p_observed)==1,]
+
+  X0[[i]] = X0i
+  Y0[[i]] = Y0i
+}
+
+X0 = do.call("rbind", X0)
+Y0 = do.call("rbind", Y0)
+
+X = data.frame(X0); Y = data.frame(Y0)
+nonz_a = c(2, 5, 10, 20)
+nonz_b =  c(2, 3, 4)
+
+mod <- tosccamm(X, Y, folds = 2, nonzero_a = nonz_a, nonzero_b = nonz_b, silent = TRUE)
+#plt.selstab(mod,X, Y)
 }
 }
