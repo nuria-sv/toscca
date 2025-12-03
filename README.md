@@ -1,9 +1,11 @@
+# TOSCCA NOW AVAILABLE ON CRAN
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # toscca <img src="https://github.com/nuria-sv/toscca/blob/master/logo.png" height="132" width="110" align="right">
 
 <!-- badges: start -->
+![License](https://img.shields.io/github/license/nuria-sv/tosccamm)
 <!-- badges: end -->
 
 ## Overview
