@@ -15,7 +15,7 @@ toscca(
   silent = FALSE,
   toPlot = TRUE,
   typeResid = "basic",
-  combination = TRUE,
+  combination = FALSE,
   parallel_logic = FALSE
 )
 }
@@ -81,7 +81,7 @@ X = standardVar(X0)
 Y = standardVar(Y0)
 K = 2                                       # number of components to be estimated
 nonz_x = c(2,5, 10, 20)                     # number of nonzero variables for X
-nonz_y = c(1, 2, 3, 4)                      # number of nonzero variables for Y
+nonz_y = c(2, 3, 4)                      # number of nonzero variables for Y
 init   = "uniform"                          # type of initialisation
 cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init, silent = TRUE, toPlot = FALSE)
 

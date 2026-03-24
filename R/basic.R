@@ -188,39 +188,32 @@ powerMethod = function(mat, vec, tol = 10^(-6), maxIter = 500, silent = TRUE) {
 #' X = standardVar(X0)
 #' Y = standardVar(Y0)
 #' @export
-scale_rm <- function(mat, origin = NULL, centre = FALSE) {
+scale_rm = function (mat, origin = NULL, centre = FALSE)
+{
   ncols = ncol(mat)
   nrows = nrow(mat)
-  if(is.null(origin)) { # get min collection date
-    origin_rows = as.numeric(unlist(sapply(unique(mat$id), function(x) which(mat$time==min(mat[mat$id==x,]$time)))))
+  if (is.null(origin)) {
+    # origin_rows = as.numeric(unlist(sapply(unique(mat$id),
+    #                                        function(x) which(mat$time == min(mat[mat$id == x, ]$time)))))
+    origin_rows <- sapply(unique(mat$id), function(x) {
+      rows <- which(mat$id == x)
+      rows[which.min(mat$time[rows])]
+    }
+    )
   } else {
     origin_rows = which(mat$time == origin)
   }
-
-  # scale first columnwise
-  cent = sapply(3:ncols, function(j) mean(as.matrix(mat[origin_rows,j])))
-  dist   = sapply(3:ncols, function(j) sqrt(sum((mat[,j] - cent[j-2])**2)/max(1, length(mat[,j]-1))))
-  mat[,3:ncols] = sapply(3:ncols, function(j) mat[,j]/dist[j-2])                       # faster than sweep
-  # centre whole dataset
-  if(centre) {
-    gen_cent = mean(as.matrix(mat[origin_rows,3:ncols]))
-    mat[,3:ncols]  = sapply(3:ncols, function(j) mat[,j] - gen_cent)
+  cent = sapply(3:ncols, function(j) mean(as.matrix(mat[origin_rows, j])))
+  dist = sapply(3:ncols, function(j) sqrt(sum((mat[, j] - cent[j - 2])^2)/max(1, length(mat[, j] - 1))))
+  mat[, 3:ncols] = sapply(3:ncols, function(j) mat[, j]/dist[j - 2])
+  if (centre) {
+    gen_cent = mean(as.matrix(mat[origin_rows, 3:ncols]))
+    mat[, 3:ncols] = sapply(3:ncols, function(j) mat[, j] -
+                              gen_cent)
   }
-  # cent = sapply(3:ncols, function(j) mean(mat[origin_rows,j]))
-  # if(centre) {
-  #   mat[,3:ncols] <- sapply(3:ncols, function(j) mat[,j] - cent[j-2])
-  #   # mat[,3:ncols] <- sweep(mat[3:ncols], 2L, cent, check.margin=FALSE)
-  #   dist = sapply(3:ncols, function(j) sqrt(sum(mat[,j]**2)/max(1, length(mat[,j]-1))))
-  #
-  # } else {
-  #   dist = sapply(3:ncols, function(j) sqrt(sum((mat[,j] - cent[j-2])**2)/max(1, length(mat[,j]-1))))
-  #
-  # }
-  # mat_st = sweep(mat[,3:ncols], 2, dist, "/", check.margin = FALSE)
-  # mat_st = as.matrix(cbind(mat[,1:2], mat_st), nrow = nrows, ncol = ncols)
-  # colnames(mat_st) <- colnames(mat)
   return(data.frame(mat))
 }
+
 
 
 # modes -------------------------------------------------------------------
@@ -386,6 +379,8 @@ myHeatmap <- function(mat, palette_values = mpalette, blue = NULL, xlab = "", yl
 #' @param object A toscca object.
 #' @param X nxp matrix. Observation matrix.
 #' @param Y A nxq matrix. Observation matrix.
+#' @param nonz_x Numeric vector. Sparsity levels of X.
+#' @param nonz_y Numeric vector. Sparsity levels of Y.
 #' @param palette_values Character. Name of a palette for the heatmap. Default is "Teal".
 #' @param mm Logic. Indicates whether there are multiple measurements or not. Default is True.
 #' @param blue Logical. If TRUE, use only scale of blues from palette.
@@ -398,70 +393,55 @@ myHeatmap <- function(mat, palette_values = mpalette, blue = NULL, xlab = "", yl
 #' N = 10
 #' p = 25
 #' q = 5
-#' X0 = list()
-#' Y0 = list()
+#' # noise
+#' X0 = sapply(1:p, function(x) rnorm(N))
+#' Y0 = sapply(1:q, function(x) rnorm(N))
+#'
+#' colnames(X0) = paste0("x", 1:p)
+#' colnames(Y0) = paste0("y", 1:q)
+#'
+#' # signal
+#' Z1 = rnorm(N,0,10)
+#'
 #'
 #' #Some associations with the true signal
-#' cwa = (6:10) / 10
-#' cwb  = -(2:3) / 10
+#' alpha = (6:10) / 10
+#' beta  = -(2:3) / 10
 #'
-#' alpha = rep(0, p)
-#' beta = rep(0, q)
+#' loc_alpha = 1:length(alpha)
+#' loc_beta  = 1:length(beta)
 #'
-#' loc_alpha = sample(1:p, length(cwa))
-#' loc_beta  = sample(1:q, length(cwb))
+#' for(j in 1:length(alpha))
+#'   X0[, loc_alpha[j]] =  alpha[j] * Z1 + rnorm(N,0,0.03)
 #'
-#' alpha[loc_alpha] = cwa
-#' beta[loc_beta] = cwb
+#' for(j in 1:length(beta))
+#'   Y0[, loc_beta[j]] =  beta[j] * Z1 + rnorm(N,0,0.03)
 #'
-#' sg = matrix(c(1, 0.6, 0.3, rep(0, 2),
-#'               0.6, 1, 0.6, 0.3, rep(0, 1),
-#'               0.3, 0.6, 1, 0.6, 0.3,
-#'               rep(0,1), 0.3, 0.6, 1, 0.6,
-#'               rep(0,2), 0.3, 0.6, 1), ncol = 5)
-#' for(i in 1:N)
-#' {
-#'   times = 1:5
-#'   Zi1 = (sin(100*times))^times +   times * 0.65 +rnorm(1,0,0.95)
-#'   Zi = cbind(Zi1)
-#'   #Simulate data and add some noise
-#'   X0i = sapply(1:p, function(a) MASS::mvrnorm(1, (Zi %*% t(alpha))[,a], Sigma = sg))
-#'   Y0i = sapply(1:q, function(a) MASS::mvrnorm(1, (Zi %*% t(beta))[,a], Sigma = sg))
-#'
-#'   colnames(X0i) = paste0("X", 1:ncol(X0i))
-#'   colnames(Y0i) = paste0("Y", 1:ncol(Y0i))
-#'   #Check the simulated cross correlation
-#'   #image(cor(X0i, Y0i))
-#'
-#'   #Remove some observations
-#'   # p_observed = 1
-#'   X0i = cbind(id=i, time=times, X0i)#[rbinom(length(times),1,p_observed)==1,]
-#'   Y0i = cbind(id=i, time=times, Y0i)#[rbinom(length(times),1,p_observed)==1,]
-#'
-#'   X0[[i]] = X0i
-#'   Y0[[i]] = Y0i
-#' }
-#'
-#' X0 = do.call("rbind", X0)
-#' Y0 = do.call("rbind", Y0)
-#'
-#' X = data.frame(X0); Y = data.frame(Y0)
-#' nonz_a = c(2, 5, 10, 20)
-#' nonz_b =  c(2, 3, 4)
-#'
-#' mod <- tosccamm(X, Y, folds = 2, nonzero_a = nonz_a, nonzero_b = nonz_b, silent = TRUE)
-#' #plt.selstab(mod,X, Y)
+#' # performa toscca
+#' X = standardVar(X0)
+#' Y = standardVar(Y0)
+#' K = 2                                       # number of components to be estimated
+#' nonz_x = c(2,5, 10, 20)                     # number of nonzero variables for X
+#' nonz_y = c(2, 3, 4)                      # number of nonzero variables for Y
+#' init   = "uniform"                          # type of initialisation
+#' cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init,
+#' combination = TRUE, K=1, silent = TRUE, toPlot = FALSE)
+#' plt <- plt.selstab(cca_toscca,X, Y, nonz_x = nonz_x, nonz_y = nonz_y, mm=FALSE)
+
 #' }
 #' @export
-plt.selstab=
-  function (object, X, Y, palette_values = mpalette, blue = TRUE, mm = TRUE, k=1)
+plt.selstab = function (object, X, Y, nonz_x, nonz_y, palette_values = mpalette, blue = TRUE, mm = TRUE, k=1)
   {
     index <- count <- NULL
-    if(!is.null(object$alpha)) mat = object$canCor_grid
-    if(is.null(object$alpha)) mat = object[[k]]$canCor_grid
+    if(is.null(nonz_x) & is.null(nonz_y)) {
+      if(!is.null(object$alpha)) mat = object$canCor_grid
+      if(is.null(object$alpha)) mat = object[[k]]$canCor_grid
 
-    nonz_x = sort(as.numeric(rownames(mat)))
-    nonz_y = sort(as.numeric(colnames(mat)))
+      nonz_x = sort(as.numeric(rownames(mat)))
+      nonz_y = sort(as.numeric(colnames(mat)))
+
+      if(is.null(mat)) stop("Provide sparsity levels for stability selection plots.")
+    }
 
     if(mm){
       run_cca <- function(i) {
@@ -476,7 +456,7 @@ plt.selstab=
 
     } else {
       run_cca <- function(i) {
-        cca_res = toscca::toscca(
+        cca_res = toscca(
           X, Y,
           nonz_x[i],
           nonz_y[1], K = 1, "uniform",
@@ -574,8 +554,7 @@ plt.selstab=
 #' getWhich(rnorm(100), max)
 #'
 #' @export
-getWhich =
-  function (data, fun)
+getWhich = function (data, fun)
   {
     fun = match.fun(fun)
     position = (which(data == fun(data)))
@@ -732,3 +711,58 @@ toscca.lv <- function(data, alpha, beta) {
 
 
 
+
+
+
+# helpers -----------------------------------------------------------------
+
+summary.toscca_object <- function(object, ...) {
+  mod_type <- c("Sparse CCA (1)", "Longitudinal Sparse CCA (2)", "Multi-Logitudinal Sparse CCA (3)")
+  type = object$type
+  K = length(object$cancor)
+
+  if(type == 3) dlist = length(cw_list)
+
+  cat("Model: ", mod_type[type], "\n")
+  cat("Components: ", K, "\n")
+
+  cc_tab <- as.table(object$cancor)
+  dimnames(cc_tab) <- list(K = c(1:K))
+  cat("Canonical Correlations: \n")
+  print(cc_tab)
+  cat("-------------------------------- \n")
+
+  #   sparsity
+  if(type < 3) {
+    nz_a <- sapply(1:K, function(k) length(object$alpha[object$alpha[,k]==0,k]))
+    nz_b <- sapply(1:K, function(k) length(object$beta[object$beta[,k]==0,k]))
+    cw_tab <- as.table(cbind(nz_a, nz_b))
+  } else {
+    cw <- sapply(1:K, function(k) sapply(1:dlist, function(d) length(object$cw[[d]][object$cw[[d]][,k]==0,k])))
+    cw_tab <- as.table(cw)
+  }
+  dimnames(cw_tab) <- list(K = c(1:K), Dataset = unlist(ifelse(type < 3, list(c("A", "B")), list(paste0("X", 1:dlist)))))
+
+  if(type > 1) {
+    m <-menu(c("Yes", "No"), title="Do you want to print the longitudinal models' summary?")
+
+    if(m==1) {
+      for (k in 1:K) {
+        cat("-------------------------------- \n")
+        cat("Longitudinal model for k = ", k, ": dataset 1 \n")
+        print(summary(object$me_x))
+
+        cat("\n--\n\nLongitudinal model for k = ", k, ": dataset 2 \n")
+        print(summary(object$me_y))
+        cat("-------------------------------- \n")
+
+      }
+    }
+  }
+}
+
+plot.toscca_object <- function(object, ...) {
+  if(type == 1) {
+
+  }
+}
