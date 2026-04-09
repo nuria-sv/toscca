@@ -11,11 +11,13 @@ tosccamm(
   nonzero_b,
   folds = 1,
   parallel_logic = FALSE,
+  toPlot = TRUE,
   silent = FALSE,
   ATest_res = NULL,
   BTest_res = NULL,
   model = "lme",
   lmeformula = " ~ -1 + time + (1|id)",
+  predictor = NULL,
   arformula = c(1, 0, 0)
 )
 }
@@ -32,6 +34,8 @@ tosccamm(
 
 \item{parallel_logic}{Logical. TRUE to parallelise folds. Default is FALSE.}
 
+\item{toPlot}{Logical. If TRUE, plot will be generated automatically showing the estimated canonical weights. Default is TRUE.}
+
 \item{silent}{Logical. TRUE to keep silent output messages. Default is FALSE.}
 
 \item{ATest_res}{NULL. Keep NULL.}
@@ -42,75 +46,14 @@ tosccamm(
 
 \item{lmeformula}{Character. LME formula. Default is " ~ -1 + time + (1|id)".}
 
+\item{predictor}{data.frame object with variables id and/or time to be used in lmeformula.}
+
 \item{arformula}{Numeric vector. Choice of ARIMA. Default is c(1,0,0).}
 }
 \value{
-Canonical vectors for k components.
-
 List with estimated tosccamm parameters.
 }
 \description{
 This function estimates sparse canonical vectors for matrices with multiple measurements
 and the trajectories of the latent variables.
-}
-\examples{
-\donttest{
-# example code
-#sample size etc
-N = 10
-p = 25
-q = 5
-X0 = list()
-Y0 = list()
-
-#Some associations with the true signal
-cwa = (6:10) / 10
-cwb  = -(2:3) / 10
-
-alpha = rep(0, p)
-beta = rep(0, q)
-
-loc_alpha = 1:length(alpha)
-loc_beta  = 1:length(beta)
-
-alpha[loc_alpha] = cwa
-beta[loc_beta] = cwb
-
-sg = matrix(c(1, 0.6, 0.3, rep(0, 2),
-              0.6, 1, 0.6, 0.3, rep(0, 1),
-              0.3, 0.6, 1, 0.6, 0.3,
-              rep(0,1), 0.3, 0.6, 1, 0.6,
-              rep(0,2), 0.3, 0.6, 1), ncol = 5)
-for(i in 1:N)
-{
-  times = 1:5
-  Zi1 = (sin(100*times))^times +   times * 0.65 +rnorm(1,0,0.95)
-  Zi = cbind(Zi1)
-  #Simulate data and add some noise
-  X0i = sapply(1:p, function(a) MASS::mvrnorm(1, (Zi \%*\% t(alpha))[,a], Sigma = sg))
-  Y0i = sapply(1:q, function(a) MASS::mvrnorm(1, (Zi \%*\% t(beta))[,a], Sigma = sg))
-
-  colnames(X0i) = paste0("X", 1:ncol(X0i))
-  colnames(Y0i) = paste0("Y", 1:ncol(Y0i))
-  #Check the simulated cross correlation
-  #image(cor(X0i, Y0i))
-
-  #Remove some observations
-  # p_observed = 1
-  X0i = cbind(id=i, time=times, X0i)#[rbinom(length(times),1,p_observed)==1,]
-  Y0i = cbind(id=i, time=times, Y0i)#[rbinom(length(times),1,p_observed)==1,]
-
-  X0[[i]] = X0i
-  Y0[[i]] = Y0i
-}
-
-X0 = do.call("rbind", X0)
-Y0 = do.call("rbind", Y0)
-
-X = data.frame(X0); Y = data.frame(Y0)
-nonz_a = c(2, 5, 10, 20)
-nonz_b =  c(2, 3, 4)
-
-mod <- tosccamm(X, Y, folds = 2, nonzero_a = nonz_a, nonzero_b = nonz_b, silent = TRUE)
-}
 }

@@ -303,6 +303,8 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
 #' @importFrom stats rnorm
 #' @importFrom graphics matplot
 #' @importFrom graphics title
+#' @importFrom grDevices colorRampPalette
+#' @importFrom scales alpha
 #' @return a list with the following elements:
 
 toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, parallel_logic = FALSE, silent = FALSE, toPlot = TRUE, ATest_res = NULL, BTest_res = NULL) {
@@ -426,20 +428,22 @@ toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
   }
 
   if(toPlot & isFALSE(parallel_logic)) {
-    oldpar <- par(no.readonly = TRUE) # code line i
-    on.exit(par(oldpar))
+    oldpar <- par(no.readonly = TRUE)
+    on.exit({
+      try(par(oldpar), silent = TRUE)
+    })
 
     par(mfrow = c(2, 2))
-    col = alpha(colorRampPalette(mpalette[-1])(ncol(matrix(resultKFold$a, nrow = p))), 0.6)
+    col = colorRampPalette(mpalette[-1])(ncol(matrix(resultKFold$a, nrow = p)))
 
-    matplot(matrix(resultKFold$alpha, nrow = p), type = "l", ylab = "alpha", xlab = "p", col = col)
+    matplot(matrix(resultKFold$alpha, nrow = p), pch = 19, ylab = expression(w^(1)), xlab = expression(p^(1)), col = alpha(col, 0.6))
     title("Full set")
 
-    matplot(resultKFold$alpha[,select], type = "l", ylab = "alpha", xlab = "p")
+    matplot(resultKFold$alpha[,select], pch = 19, ylab = expression(w^(1)), xlab = expression(p^(1)), col = col[select])
     title("K-fold CV best")
 
-    matplot(matrix(resultKFold$beta, nrow = q), type = "l", ylab = "beta", xlab = "q", col = col)
-    matplot(resultKFold$beta[,select], type = "l", ylab = "beta", xlab = "q")
+    matplot(matrix(resultKFold$beta, nrow = q), pch = 19, ylab = expression(w^(2)), xlab = expression(p^(2)), col = alpha(col, 0.6))
+    matplot(resultKFold$beta[,select], pch = 19, ylab = expression(w^(2)), xlab = expression(p^(2)), col = col[select])
 
 
   }
@@ -487,6 +491,10 @@ toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
 #' @param combination Logical. If TRUE, the algorithm will search for the best combination of sparsity choice nonzero_a and nonzero_b for each component. This should be used for exploratory analysis. Default is FALSE.
 #' @param parallel_logic Logical. If TRUE, cross-validation is done in parallel.Default is FALSE.
 #' @param type Numeric. Takes values 1 (standard), 2 (dynamic) or 3 (dynamic for multiple datasets) depending of the toscca variation implemented.
+#' @param model Character. If type == 2, then lme can take values "lme" or "arima".
+#' @param lmeformula Character. Lme type formula to be used if type ==2 and model == "lme".
+#' @param arformula Numeric vector indicating arima parametrisation if type == 2 and model == "arima".
+#' @param predictor data.frame object with variables id and/or time to be used in lmeformula.
 #' @return a list with the following elements:
 #' @examples
 #' #sample size etc
@@ -524,7 +532,8 @@ toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
 #' nonz_x = c(2,5, 10, 20)                     # number of nonzero variables for X
 #' nonz_y = c(2, 3, 4)                      # number of nonzero variables for Y
 #' init   = "uniform"                          # type of initialisation
-#' cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init, silent = TRUE, toPlot = FALSE, type = 1)
+#' cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init,
+#' silent = TRUE, toPlot = FALSE, type = 1)
 #'
 #' @return List with estimated toscca parameters.
 #' @export
@@ -724,11 +733,13 @@ toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ra
 #' nonz_x = c(2,5, 10, 20)                     # number of nonzero variables for X
 #' nonz_y = c(1, 2, 3, 4)                      # number of nonzero variables for Y
 #' init   = "uniform"                          # type of initialisation
-#' cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init, silent = TRUE, toPlot = FALSE)
+#' cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init,
+#' silent = TRUE, toPlot = FALSE, type = 1)
 #' \donttest{
 #' #dont run due to parallelisation.
 #' cc = cca_toscca$cancor
-#' perm_toscca = toscca.perm(X, Y, nonz_x, nonz_y, K = K, init, draws = 10, cancor = cc, ncores = 2)
+#' perm_toscca = toscca.perm(X, Y, nonz_x, nonz_y, K = K, init, draws = 10,
+#' cancor = cc, ncores = 2)
 #' }
 #' @return List with permuted correlations and p-values.
 #' @export
@@ -747,7 +758,7 @@ toscca.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "r
       if(isFALSE(silent)) progressBar(draws, d)
 
       ASample = A[sample(1:nrow(A), nrow(A)),]
-      t(toscca.tStat(toscca(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE, parallel_logic = FALSE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]) #off-sample cancor
+      t(toscca.tStat(toscca(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE, parallel_logic = FALSE, type =1)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]) #off-sample cancor
 
     }
 
@@ -756,7 +767,7 @@ toscca.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "r
       # cat("|", rep(".", d), rep(" ", (draws-d)), "|", (d/draws)*100, "%\r")
       if(isFALSE(silent)) progressBar(draws, d)
       ASample = A[sample(1:nrow(A), nrow(A)),]
-      perm[d,] = toscca.tStat(toscca(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]] #off-sample cancor
+      perm[d,] = toscca.tStat(toscca(A = ASample, B = B, K = K, alpha_init = alpha_init, combination = FALSE, nonzero_a=nonzero_a, nonzero_b=nonzero_b, toPlot = FALSE, silent = TRUE, type = 1)$cancor, ASample, B, C = nuisanceVar, type = testStatType)[["tStatistic"]] #off-sample cancor
 
 
     }
@@ -776,18 +787,20 @@ toscca.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "r
     ylim = c(min((modes(permDensity)$y), min(perm[,getWhich(testStatistic, max)])), max((modes(permDensity)$y) + margin, max(h$counts) + margin))
 
 
-    oldpar <- par(no.readonly = TRUE) # code line i
-    on.exit(par(oldpar))
+    oldpar <- par(no.readonly = TRUE)
+    on.exit({
+      try(par(oldpar), silent = TRUE)
+    })
 
     par(mfrow=c(1,1))
     hist(perm[, getWhich(testStatistic, max)], breaks = draws/2, xlab = "Canonical Correlation",
          xlim = xlim, ylim =  ylim, main = paste0("Distribution under de Null - ", testStatType, " Statistic") , col =  scales::alpha("#01768c", 0.2))
     lines(permDensity, col="black", lwd = 2)
     epdfPlot(perm[,getWhich(testStatistic, max)], discrete = FALSE, density.arg.list = NULL, plot.it = TRUE,
-             add = TRUE, epdf.col = "steelblue", epdf.lwd = 3 * par("cex"), epdf.lty = 1,
-             curve.fill = FALSE, curve.fill.col = "steelblue", main = NULL, xlab = NULL, ylab = NULL)
-    abline(v=testStatistic, col = "#e86d07", lwd = 2)
-    legend("topleft", c("Empirical pdf", "density", "model canCor"), col = c("steelblue", "black", "red"), lty=c(2, 1, 1), cex=0.8)
+             add = TRUE, epdf.col = mpalette[5], epdf.lwd = 3 * par("cex"), epdf.lty = 1,
+             curve.fill = FALSE, curve.fill.col = mpalette[5], main = NULL, xlab = NULL, ylab = NULL)
+    abline(v=testStatistic, col = mpalette[2], lwd = 2)
+    legend("topleft", c("Empirical pdf", "density", "model canCor"), col = c(mpalette[5], "black", mpalette[9]), lty=c(2, 1, 1), cex=0.8)
     text(x = as.character(testStatistic), y = 0.9*par('usr')[4], labels = as.character(1:K), cex = 0.9)
 
 
@@ -1036,73 +1049,16 @@ tosccamm.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol =
 #' @param folds Integer. Indicates number of folds to perform.
 #' @param parallel_logic Logical. TRUE to parallelise folds. Default is FALSE.
 #' @param silent Logical. TRUE to keep silent output messages. Default is FALSE.
+#' @param toPlot Logical. If TRUE, plot will be generated automatically showing the estimated canonical weights. Default is TRUE.
+#' @param predictor data.frame object with variables id and/or time to be used in lmeformula.
 #' @param ATest_res NULL. Keep NULL.
 #' @param BTest_res NULL. Keep NULL.
 #' @param model Character. c("lme", "ar"). Model to fit longitudinal latent space.
 #' @param lmeformula Character. LME formula. Default is " ~ -1 + time + (1|id)".
 #' @param arformula Numeric vector. Choice of ARIMA. Default is c(1,0,0).
 #' @importFrom MASS mvrnorm
-#' @return Canonical vectors for k components.
-#' @examples
-#' \donttest{
-#' # example code
-#' #sample size etc
-#' N = 10
-#' p = 25
-#' q = 5
-#' X0 = list()
-#' Y0 = list()
-#'
-#' #Some associations with the true signal
-#' cwa = (6:10) / 10
-#' cwb  = -(2:3) / 10
-#'
-#' alpha = rep(0, p)
-#' beta = rep(0, q)
-#'
-#' loc_alpha = 1:length(alpha)
-#' loc_beta  = 1:length(beta)
-#'
-#' alpha[loc_alpha] = cwa
-#' beta[loc_beta] = cwb
-#'
-#' sg = matrix(c(1, 0.6, 0.3, rep(0, 2),
-#'               0.6, 1, 0.6, 0.3, rep(0, 1),
-#'               0.3, 0.6, 1, 0.6, 0.3,
-#'               rep(0,1), 0.3, 0.6, 1, 0.6,
-#'               rep(0,2), 0.3, 0.6, 1), ncol = 5)
-#' for(i in 1:N)
-#' {
-#'   times = 1:5
-#'   Zi1 = (sin(100*times))^times +   times * 0.65 +rnorm(1,0,0.95)
-#'   Zi = cbind(Zi1)
-#'   #Simulate data and add some noise
-#'   X0i = sapply(1:p, function(a) MASS::mvrnorm(1, (Zi %*% t(alpha))[,a], Sigma = sg))
-#'   Y0i = sapply(1:q, function(a) MASS::mvrnorm(1, (Zi %*% t(beta))[,a], Sigma = sg))
-#'
-#'   colnames(X0i) = paste0("X", 1:ncol(X0i))
-#'   colnames(Y0i) = paste0("Y", 1:ncol(Y0i))
-#'   #Check the simulated cross correlation
-#'   #image(cor(X0i, Y0i))
-#'
-#'   #Remove some observations
-#'   # p_observed = 1
-#'   X0i = cbind(id=i, time=times, X0i)#[rbinom(length(times),1,p_observed)==1,]
-#'   Y0i = cbind(id=i, time=times, Y0i)#[rbinom(length(times),1,p_observed)==1,]
-#'
-#'   X0[[i]] = X0i
-#'   Y0[[i]] = Y0i
-#' }
-#'
-#' X0 = do.call("rbind", X0)
-#' Y0 = do.call("rbind", Y0)
-#'
-#' X = data.frame(X0); Y = data.frame(Y0)
-#' nonz_a = c(2, 5, 10, 20)
-#' nonz_b =  c(2, 3, 4)
-#'
-#' mod <- tosccamm(X, Y, folds = 2, nonzero_a = nonz_a, nonzero_b = nonz_b, silent = TRUE)
-#' }
+#' @importFrom scales alpha
+#' @importFrom grDevices colorRampPalette
 #' @return List with estimated tosccamm parameters.
 tosccamm = function(A, B, nonzero_a, nonzero_b, folds = 1, parallel_logic = FALSE, toPlot = TRUE, silent = FALSE, ATest_res = NULL, BTest_res = NULL, model = "lme", lmeformula = " ~ -1 + time + (1|id)", predictor = NULL, arformula = c(1,0,0)) {
   # N = min(nrow(A), nrow(B)) # observations
@@ -1386,22 +1342,24 @@ tosccamm = function(A, B, nonzero_a, nonzero_b, folds = 1, parallel_logic = FALS
 
 
   if(toPlot & isFALSE(parallel_logic)) {
-    oldpar <- par(no.readonly = TRUE) # code line i
-    on.exit(par(oldpar))
+    oldpar <- par(no.readonly = TRUE)
+    on.exit({
+      try(par(oldpar), silent = TRUE)
+    })
 
     par(mfrow = c(2, 2))
 
     col = alpha(colorRampPalette(mpalette[-1])(ncol(matrix(resultKFold$a, nrow = p))), 0.6)
 
 
-    matplot(matrix(resultKFold$a, nrow = p), type = "l", ylab = "alpha", xlab = "p", col = col)
+    matplot(matrix(resultKFold$a, nrow = p), pch = 19, ylab = expression(w^(1)), xlab = expression(p^(1)), col = col)
     title("Full set")
 
-    matplot(resultKFold$a[,select], type = "l", ylab = "alpha", xlab = "p", col = col[select])
+    matplot(resultKFold$a[,select], pch = 19, ylab = expression(w^(1)), xlab = expression(p^(1)), col = col[select])
     title("K-fold CV best")
 
-    matplot(matrix(resultKFold$b, nrow = q), type = "l", ylab = "beta", xlab = "q", col = col)
-    matplot(resultKFold$b[,select], type = "l", ylab = "beta", xlab = "q", col = col[select])
+    matplot(matrix(resultKFold$b, nrow = q), pch = 19, ylab = expression(w^(2)), xlab = expression(p^(2)), col = col)
+    matplot(resultKFold$b[,select], pch = 19, ylab = expression(w^(2)), xlab = expression(p^(2)), col = col[select])
 
 
 
@@ -1526,7 +1484,7 @@ tosccamm = function(A, B, nonzero_a, nonzero_b, folds = 1, parallel_logic = FALS
 #' nonz_a = c(2, 5, 10, 20)
 #' nonz_b =  c(2, 3, 4)
 #'
-#' mod <- tosccamm(X, Y, folds = 2, nonzero_a = nonz_a, nonzero_b = nonz_b, silent = TRUE)
+#' mod <- toscca(X, Y, folds = 2, nonzero_a = nonz_a, nonzero_b = nonz_b, silent = TRUE, type = 2)
 #' nza <- mod$nonzero_a
 #' nzb <- mod$nonzero_b
 #' cc  <- mod$cancor
@@ -1641,8 +1599,10 @@ toscamm.perm = function (A, B, nonzero_a, nonzero_b, K=1, folds = 1, toPlot = FA
                                                              max)])), max((modes(permDensity)$y) + margin, max(h$counts) +
                                                                             margin))
 
-    oldpar <- par(no.readonly = TRUE) # code line i
-    on.exit(par(oldpar))
+    oldpar <- par(no.readonly = TRUE)
+    on.exit({
+      try(par(oldpar), silent = TRUE)
+    })
 
     par(mfrow = c(1, 1))
     #   hist(perm[, getWhich(testStatistic, max)], breaks = draws/2,
@@ -1740,8 +1700,10 @@ toscamm.perm = function (A, B, nonzero_a, nonzero_b, K=1, folds = 1, toPlot = FA
     permDensity = density(perm[, getWhich(testStatistic,
                                           max)])
 
-    oldpar <- par(no.readonly = TRUE) # code line i
-    on.exit(par(oldpar))
+    oldpar <- par(no.readonly = TRUE)
+    on.exit({
+      try(par(oldpar), silent = TRUE)
+    })
 
     par(mfrow = c(1, 1))
     hist(perm[, getWhich(testStatistic, max)], breaks = draws/2,
@@ -1773,17 +1735,5 @@ toscamm.perm = function (A, B, nonzero_a, nonzero_b, K=1, folds = 1, toPlot = FA
 
 
 
-# permutation -------------------------------------------------------------
 
-permutation = function(A, B, toscca_object, parallel_logic) {
-  type = toscca_object$type
-  if(type == 1) {
 
-  }
-
-  if(type == 2) {
-
-  }
-
-  return(output)
-}

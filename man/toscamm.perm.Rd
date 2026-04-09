@@ -129,7 +129,7 @@ X = data.frame(X0); Y = data.frame(Y0)
 nonz_a = c(2, 5, 10, 20)
 nonz_b =  c(2, 3, 4)
 
-mod <- tosccamm(X, Y, folds = 2, nonzero_a = nonz_a, nonzero_b = nonz_b, silent = TRUE)
+mod <- toscca(X, Y, folds = 2, nonzero_a = nonz_a, nonzero_b = nonz_b, silent = TRUE, type = 2)
 nza <- mod$nonzero_a
 nzb <- mod$nonzero_b
 cc  <- mod$cancor

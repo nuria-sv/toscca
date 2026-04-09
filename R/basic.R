@@ -382,7 +382,6 @@ myHeatmap <- function(mat, palette_values = mpalette, blue = NULL, xlab = "", yl
 #' @param nonz_x Numeric vector. Sparsity levels of X.
 #' @param nonz_y Numeric vector. Sparsity levels of Y.
 #' @param palette_values Character. Name of a palette for the heatmap. Default is "Teal".
-#' @param mm Logic. Indicates whether there are multiple measurements or not. Default is True.
 #' @param blue Logical. If TRUE, use only scale of blues from palette.
 #' @param k Numeric. Component, default k =1.
 #' @return No return value, called for selection stability pot.
@@ -424,13 +423,13 @@ myHeatmap <- function(mat, palette_values = mpalette, blue = NULL, xlab = "", yl
 #' nonz_x = c(2,5, 10, 20)                     # number of nonzero variables for X
 #' nonz_y = c(2, 3, 4)                      # number of nonzero variables for Y
 #' init   = "uniform"                          # type of initialisation
-#' cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init,
+#' cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init, type =1,
 #' combination = TRUE, K=1, silent = TRUE, toPlot = FALSE)
-#' plt <- plt.selstab(cca_toscca,X, Y, nonz_x = nonz_x, nonz_y = nonz_y, mm=FALSE)
+#' plt <- plt.selstab(cca_toscca,X, Y, nonz_x = nonz_x, nonz_y = nonz_y)
 
 #' }
 #' @export
-plt.selstab = function (object, X, Y, nonz_x, nonz_y, palette_values = mpalette, blue = TRUE, mm = TRUE, k=1)
+plt.selstab = function (object, X, Y, nonz_x, nonz_y, palette_values = mpalette, blue = TRUE, k=1)
   {
     index <- count <- NULL
     if(is.null(nonz_x) & is.null(nonz_y)) {
@@ -442,14 +441,15 @@ plt.selstab = function (object, X, Y, nonz_x, nonz_y, palette_values = mpalette,
 
       if(is.null(mat)) stop("Provide sparsity levels for stability selection plots.")
     }
+    type = object$type
 
-    if(mm){
+    if(type == 2){
       run_cca <- function(i) {
-        cca_res = tosccamm(
+        cca_res = toscca(
           X, Y,
           nonzero_a = nonz_x[i],
           nonzero_b = nonz_y[1],
-          silent = TRUE
+          silent = TRUE, type =2
         )
         list(alpha = cca_res$alpha[, 1], beta = cca_res$beta[, 1], cancor = cca_res$cancor[1])
       }
@@ -457,7 +457,7 @@ plt.selstab = function (object, X, Y, nonz_x, nonz_y, palette_values = mpalette,
     } else {
       run_cca <- function(i) {
         cca_res = toscca(
-          X, Y,
+          X, Y, type = 1,
           nonz_x[i],
           nonz_y[1], K = 1, "uniform",
           combination = FALSE, silent = TRUE, toPlot = FALSE)
@@ -715,13 +715,63 @@ toscca.lv <- function(data, alpha, beta) {
 
 
 # helpers -----------------------------------------------------------------
-
+#' Plot heatmap of cv w.r.t. the penalty parameter perfotmance.
+#'
+#' This function plots cca for different thresholds
+#'
+#' @param object toscca object.
+#' @param ... further arguments passed to or from methods.
+#' @importFrom utils menu
+#' @return No return value, called for plotting heatmap.
+#' @examples
+#' \donttest{
+#' # example code
+#' #sample size etc
+#' N = 10
+#' p = 25
+#' q = 5
+#' # noise
+#' X0 = sapply(1:p, function(x) rnorm(N))
+#' Y0 = sapply(1:q, function(x) rnorm(N))
+#'
+#' colnames(X0) = paste0("x", 1:p)
+#' colnames(Y0) = paste0("y", 1:q)
+#'
+#' # signal
+#' Z1 = rnorm(N,0,10)
+#'
+#'
+#' #Some associations with the true signal
+#' alpha = (6:10) / 10
+#' beta  = -(2:3) / 10
+#'
+#' loc_alpha = 1:length(alpha)
+#' loc_beta  = 1:length(beta)
+#'
+#' for(j in 1:length(alpha))
+#'   X0[, loc_alpha[j]] =  alpha[j] * Z1 + rnorm(N,0,0.03)
+#'
+#' for(j in 1:length(beta))
+#'   Y0[, loc_beta[j]] =  beta[j] * Z1 + rnorm(N,0,0.03)
+#'
+#' # performa toscca
+#' X = standardVar(X0)
+#' Y = standardVar(Y0)
+#' K = 2                                       # number of components to be estimated
+#' nonz_x = c(2,5, 10, 20)                     # number of nonzero variables for X
+#' nonz_y = c(2, 3, 4)                      # number of nonzero variables for Y
+#' init   = "uniform"                          # type of initialisation
+#' cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init, type =1,
+#' combination = TRUE, K=1, silent = TRUE, toPlot = FALSE)
+#' summary(cca_toscca)
+#' }
+#' @export
 summary.toscca_object <- function(object, ...) {
   mod_type <- c("Sparse CCA (1)", "Longitudinal Sparse CCA (2)", "Multi-Logitudinal Sparse CCA (3)")
   type = object$type
   K = length(object$cancor)
 
-  if(type == 3) dlist = length(cw_list)
+  if(type == 3) dlist = length(object$cw_list)
 
   cat("Model: ", mod_type[type], "\n")
   cat("Components: ", K, "\n")
@@ -761,8 +811,22 @@ summary.toscca_object <- function(object, ...) {
   }
 }
 
-plot.toscca_object <- function(object, ...) {
-  if(type == 1) {
+# plot.toscca_object <- function(object, ...) {
+#   if(type == 1) {
+#
+#   }
+# }
 
-  }
-}
+
+
+# data --------------------------------------------------------------------
+#
+# function (url = "https://tibshirani.su.domains/PMA/breastdata.rda")
+# {
+#   tmpdir <- tempdir()
+#   filepath <- file.path(tmpdir, "breastdata.rda")
+#   utils::download.file(url, filepath)
+#   e <- new.env()
+#   load(filepath, envir = e)
+#   e$breastdata
+# }

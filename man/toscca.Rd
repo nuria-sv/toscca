@@ -12,11 +12,16 @@ toscca(
   K = 1,
   alpha_init = c("eigen", "random", "uniform"),
   folds = 1,
+  type = NA,
   silent = FALSE,
   toPlot = TRUE,
   typeResid = "basic",
   combination = FALSE,
-  parallel_logic = FALSE
+  parallel_logic = FALSE,
+  model = "lme",
+  lmeformula = " ~ -1 + time + (1|id)",
+  predictor = NULL,
+  arformula = c(1, 0, 0)
 )
 }
 \arguments{
@@ -30,6 +35,8 @@ toscca(
 
 \item{folds}{Numeric. Number of folds for the cross-validation process.}
 
+\item{type}{Numeric. Takes values 1 (standard), 2 (dynamic) or 3 (dynamic for multiple datasets) depending of the toscca variation implemented.}
+
 \item{silent}{Logical. If FALSE, a progress bar will appear on the console. Default is FALSE.}
 
 \item{toPlot}{Logical. If TRUE, plot will be generated automatically showing the estimated canonical weights. Default is TRUE.}
@@ -39,6 +46,14 @@ toscca(
 \item{combination}{Logical. If TRUE, the algorithm will search for the best combination of sparsity choice nonzero_a and nonzero_b for each component. This should be used for exploratory analysis. Default is FALSE.}
 
 \item{parallel_logic}{Logical. If TRUE, cross-validation is done in parallel.Default is FALSE.}
+
+\item{model}{Character. If type == 2, then lme can take values "lme" or "arima".}
+
+\item{lmeformula}{Character. Lme type formula to be used if type ==2 and model == "lme".}
+
+\item{predictor}{data.frame object with variables id and/or time to be used in lmeformula.}
+
+\item{arformula}{Numeric vector indicating arima parametrisation if type == 2 and model == "arima".}
 }
 \value{
 a list with the following elements:
@@ -83,6 +98,7 @@ K = 2                                       # number of components to be estimat
 nonz_x = c(2,5, 10, 20)                     # number of nonzero variables for X
 nonz_y = c(2, 3, 4)                      # number of nonzero variables for Y
 init   = "uniform"                          # type of initialisation
-cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init, silent = TRUE, toPlot = FALSE)
+cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init,
+silent = TRUE, toPlot = FALSE, type = 1)
 
 }
