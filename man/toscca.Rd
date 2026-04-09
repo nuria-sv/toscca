@@ -12,11 +12,16 @@ toscca(
   K = 1,
   alpha_init = c("eigen", "random", "uniform"),
   folds = 1,
+  type = NA,
   silent = FALSE,
   toPlot = TRUE,
   typeResid = "basic",
-  combination = TRUE,
-  parallel_logic = FALSE
+  combination = FALSE,
+  parallel_logic = FALSE,
+  model = "lme",
+  lmeformula = " ~ -1 + time + (1|id)",
+  predictor = NULL,
+  arformula = c(1, 0, 0)
 )
 }
 \arguments{
@@ -30,6 +35,8 @@ toscca(
 
 \item{folds}{Numeric. Number of folds for the cross-validation process.}
 
+\item{type}{Numeric. Takes values 1 (standard), 2 (dynamic) or 3 (dynamic for multiple datasets) depending of the toscca variation implemented.}
+
 \item{silent}{Logical. If FALSE, a progress bar will appear on the console. Default is FALSE.}
 
 \item{toPlot}{Logical. If TRUE, plot will be generated automatically showing the estimated canonical weights. Default is TRUE.}
@@ -39,18 +46,59 @@ toscca(
 \item{combination}{Logical. If TRUE, the algorithm will search for the best combination of sparsity choice nonzero_a and nonzero_b for each component. This should be used for exploratory analysis. Default is FALSE.}
 
 \item{parallel_logic}{Logical. If TRUE, cross-validation is done in parallel.Default is FALSE.}
+
+\item{model}{Character. If type == 2, then lme can take values "lme" or "arima".}
+
+\item{lmeformula}{Character. Lme type formula to be used if type ==2 and model == "lme".}
+
+\item{predictor}{data.frame object with variables id and/or time to be used in lmeformula.}
+
+\item{arformula}{Numeric vector indicating arima parametrisation if type == 2 and model == "arima".}
 }
 \value{
 a list with the following elements:
-\itemize{
-\item{alpha}{Canonical vector for matrix \deqn{\mathbf{A}}, for each combination of sparsity value specified.}
-\item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
-\item{cancor}{Max. canonical correlation estimate.}
+
+List with estimated toscca parameters.
 }
 \description{
-This function performs CCA on matrices \deqn{\mathbf{A}} and \deqn{\mathbf{B}} via Non-Iterative PArtial Least Squares (NIPALS) algorithm
-imposing sparsity over a fixed number of variables especified.
+Sparse Canonical Correlation Analysis. Computation of CC via NIPALS with soft thresholding.
 }
-\details{
-For a exploratory analysis nonzero_a and nonzero_b can be vectors. The algorithm will then search for the best combination of sparsity choice nonzero_a and nonzero_b for each component.
+\examples{
+#sample size etc
+N = 10
+p = 25
+q = 5
+# noise
+X0 = sapply(1:p, function(x) rnorm(N))
+Y0 = sapply(1:q, function(x) rnorm(N))
+
+colnames(X0) = paste0("x", 1:p)
+colnames(Y0) = paste0("y", 1:q)
+
+# signal
+Z1 = rnorm(N,0,1)
+
+
+#Some associations with the true signal
+alpha = (6:10) / 10
+beta  = -(2:3) / 10
+
+loc_alpha = 1:length(alpha)
+loc_beta  = 1:length(beta)
+
+for(j in 1:length(alpha))
+  X0[, loc_alpha[j]] =  alpha[j] * Z1 + rnorm(N,0,0.3)
+
+for(j in 1:length(beta))
+  Y0[, loc_beta[j]] =  beta[j] * Z1 + rnorm(N,0,0.3)
+
+X = standardVar(X0)
+Y = standardVar(Y0)
+K = 2                                       # number of components to be estimated
+nonz_x = c(2,5, 10, 20)                     # number of nonzero variables for X
+nonz_y = c(2, 3, 4)                      # number of nonzero variables for Y
+init   = "uniform"                          # type of initialisation
+cca_toscca  = toscca(X, Y, nonz_x, nonz_y, K, alpha_init = init,
+silent = TRUE, toPlot = FALSE, type = 1)
+
 }

@@ -19,3 +19,33 @@ An pzp vector.
 Initialised the canonical vector for the iterative process based on
 positive eigen values. Then, SVD is performed on that PS matrix.
 }
+\examples{
+#sample size etc
+N = 10
+p = 25
+q = 5
+# noise
+X0 = sapply(1:p, function(x) rnorm(N))
+Y0 = sapply(1:q, function(x) rnorm(N))
+
+colnames(X0) = paste0("x", 1:p)
+colnames(Y0) = paste0("y", 1:q)
+
+# signal
+Z1 = rnorm(N,0,1)
+
+
+#Some associations with the true signal
+alpha = (6:10) / 10
+beta  = -(2:3) / 10
+
+loc_alpha = 1:length(alpha)
+loc_beta  = 1:length(beta)
+
+for(j in 1:length(alpha))
+  X0[, loc_alpha[j]] =  alpha[j] * Z1 + rnorm(N,0,0.3)
+
+for(j in 1:length(beta))
+  Y0[, loc_beta[j]] =  beta[j] * Z1 + rnorm(N,0,0.3)
+cv = initialiseCanVar(X0, Y0)
+}

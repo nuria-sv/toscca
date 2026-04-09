@@ -30,11 +30,6 @@ toscca.core(
 }
 \value{
 a list with the following elements:
-\itemize{
-\item{alpha}{Canonical vector for matrix \deqn{\mathbf{A}}, for each combination of sparsity value specified.}
-\item{beta}{Canonical vector for matrix \deqn{\mathbf{B}}, for each combination of sparsity value specified.}
-\item{cancor}{Max. canonical correlation estimate.}
-\item{cancor_all}{Call canonical correlations calculated for each sparsity levels.}
 }
 \description{
 Sparse Canonical Correlation Analysis. Computation of CC via NIPALS with soft thresholding.
