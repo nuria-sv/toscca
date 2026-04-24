@@ -1,16 +1,17 @@
+# TOSCCA NOW AVAILABLE ON CRAN
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # toscca <img src="https://github.com/nuria-sv/toscca/blob/master/logo.png" height="132" width="110" align="right">
 
 <!-- badges: start -->
+![License](https://img.shields.io/github/license/nuria-sv/tosccamm)
 <!-- badges: end -->
 
 ## Overview
 
 toscca is an R package to perform Thresholded Ordered Sparse Canonical
-Correlation Analysis (TOSCCA), descibed in [(Senar N. et al,
-nd)](https://arxiv.org/abs/2310.02169) for the analysis and integration
+Correlation Analysis (TOSCCA), descibed in [Senar et al. (2024)](https://doi.org/10.1093/bioadv/vbae021) for the analysis and integration
 of two datasets, at least one of which is high-dimensional. TOSCCA is an
 extension of the sparse CCA method based on soft-thresholding that
 produces near-orthogonal components, allows for browsing over various
