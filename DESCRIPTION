@@ -1,6 +1,6 @@
 Package: toscca
 Title: Thresholded Ordered Sparse CCA
-Version: 1.0
+Version: 1.1
 Authors@R: 
     person("Nuria", "Senar", , "n.senarvilladeamigo@amsterdamumc.nl", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1004-5785"))
