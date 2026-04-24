@@ -218,6 +218,12 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
     nonzero_a = nonzero_a[nonzero_a < ncol(A)]
   }
 
+  scale_nonzero <- function(x) {
+    nz <- x != 0
+    x[nz] <- scale(x[nz], center = FALSE)
+    return(x)
+  }
+
 
   #Create the matrix A
   alpha = sapply(nonzero_a, function(x) c(alphaInit))
@@ -251,6 +257,9 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
       sign(y) * tmp
     })
 
+    beta <- apply(beta, 2, scale_nonzero)
+
+
     zeta = B %*% beta
     dist = sqrt(colSums(zeta^2))
     zeta = sweep(zeta, 2, dist, "/")
@@ -267,6 +276,9 @@ toscca.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 1
       tmp[tmp<=0] = 0
       sign(y) * tmp
     })
+
+
+    alpha <- apply(alpha, 2, scale_nonzero)
 
 
     if(length(nonzero_a) == 1) e = mean(abs(gamma - varTol1)) + mean(abs(zeta - varTol2))
@@ -423,7 +435,7 @@ toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
     mat = matrix(canCor, nrow = length(nonzero_a), ncol = length(nonzero_b))
     rownames(mat) = nonzero_a
     colnames(mat) = nonzero_b
-    myHeatmap(mat)
+    plt_heatmap=myHeatmap(mat)
 
   }
 
@@ -433,7 +445,7 @@ toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
       try(par(oldpar), silent = TRUE)
     })
 
-    par(mfrow = c(2, 2))
+    par(mfrow = c(2, 2), mai = c(0.5,0.5, 0.2, 0.2), oma = c(2, 2, 0, 0))
     col = colorRampPalette(mpalette[-1])(ncol(matrix(resultKFold$a, nrow = p)))
 
     matplot(matrix(resultKFold$alpha, nrow = p), pch = 19, ylab = expression(w^(1)), xlab = expression(p^(1)), col = alpha(col, 0.6))
@@ -445,6 +457,7 @@ toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
     matplot(matrix(resultKFold$beta, nrow = q), pch = 19, ylab = expression(w^(2)), xlab = expression(p^(2)), col = alpha(col, 0.6))
     matplot(resultKFold$beta[,select], pch = 19, ylab = expression(w^(2)), xlab = expression(p^(2)), col = col[select])
 
+    plt_cw <- recordPlot()
 
   }
 
@@ -456,14 +469,16 @@ toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
 
   if(nrow(nonzeroGrid) > 1) {
     resultSCCA = list(cancor = canCorPrint,
-                    alpha  = result$alpha,
-                    beta   = result$beta,
-                    # alphaMat       = alphaMat,
-                    # betaMat        = betaMat,
-                    # position       = select,
-                    nonzero_a = nonzeroGrid[select, 1],
-                    nonzero_b = nonzeroGrid[select, 2],
-                    canCor_grid = mat)
+                      alpha  = result$alpha,
+                      beta   = result$beta,
+                      # alphaMat       = alphaMat,
+                      # betaMat        = betaMat,
+                      # position       = select,
+                      plt_heatmap = plt_heatmap,
+                      plt_cw = plt_cw,
+                      nonzero_a = nonzeroGrid[select, 1],
+                      nonzero_b = nonzeroGrid[select, 2],
+                      canCor_grid = mat)
   } else {
     resultSCCA = list(cancor = canCorPrint,
                       alpha  = result$alpha,
@@ -473,7 +488,7 @@ toscca.folds = function(A, B, nonzero_a, nonzero_b, alpha_init, folds = 1, paral
                       # position       = select,
                       nonzero_a = nonzeroGrid[select, 1],
                       nonzero_b = nonzeroGrid[select, 2])
-    }
+  }
 
   return(resultSCCA)
 }
@@ -585,7 +600,8 @@ toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ra
     alphaComponents  = matrix(NA, nrow = ncol(A), K)
     betaComponents   = matrix(NA, nrow = ncol(B), K)
     InitComponents   = matrix(NA, nrow = ncol(A), K)
-
+    plt_cw <- list(); plt_heatmap <- list()
+    canCor_grid = list()
     for(k in 1: K) {
       if(isFALSE(silent)) cat("\n__________________________________________ \n For component K = ", k, ": \n")
       if(k==1) {
@@ -615,8 +631,9 @@ toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ra
       cancorComponents[k]  = result$cancor
       alphaComponents[, k] = result$alpha
       betaComponents[, k]  = result$beta
-
-
+      canCor_grid[[k]]     = result$canCor_grip
+      plt_cw[[k]]          = result$plt_cw
+      plt_heatmap[[k]]     = result$plt_heatmap
     }
 
 
@@ -624,9 +641,14 @@ toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ra
     beta  = sapply(1:K, function(q) standardVar(betaComponents[,q], centre = FALSE, normalise = TRUE))
 
 
+
+
     output = list(cancor = cancorComponents,
-                      alpha  = alpha,
-                      beta   = beta
+                  alpha  = alpha,
+                  beta   = beta,
+                  plt_cw = plt_cw,
+                  plt_heatmap = plt_heatmap,
+                  canCor_grid = canCor_grid
     )
 
   }
@@ -662,13 +684,39 @@ toscca = function(A, B, nonzero_a, nonzero_b, K = 1, alpha_init = c("eigen", "ra
     nonzero_a  = sapply(1:K, function(k) res_k[[k]]$nonzero_a)
     nonzero_b  = sapply(1:K, function(k) res_k[[k]]$nonzero_b)
 
+    if(toPlot) {
+      if(K>1) {
+        canCor_grid = list()
+        canCor_grid = lapply(1:K, function(k) res_k[[k]]$canCor_grid)
+
+      }
+      canCor_grid = res_k[[1]]$canCor_grid
+
+    }
+
+
+    if(toPlot) {
+      if(K > 1) {
+        plt_cw <- list(); plt_heatmap <- list()
+        plt_cw = lapply(1:K, function(k) res_k[[k]]$plt_cw)
+        plt_heatmap = lapply(1:K, function(k) res_k[[k]]$plt_heatmap)
+      } else {
+        plt_cw = res_k[[1]]$plt_cw
+        plt_heatmap = res_k[[1]]$plt_heatmap
+      }
+
+    }
+
     output = list(alpha = alpha,
-                         beta = beta,
-                         cancor = cancor,
-                         me_x = me_x,
-                         me_y = me_y,
-                         nonzero_a = nonzero_a,
-                         nonzero_b = nonzero_b)
+                  beta = beta,
+                  cancor = cancor,
+                  me_x = me_x,
+                  me_y = me_y,
+                  plt_cw = plt_cw,
+                  plt_heatmap = plt_heatmap,
+                  nonzero_a = nonzero_a,
+                  nonzero_b = nonzero_b,
+                  canCor_grid = canCor_grid)
   }
 
   output$type <- type
@@ -781,27 +829,27 @@ toscca.perm = function(A, B, nonzero_a, nonzero_b, K, alpha_init = c("eigen", "r
   testStatistic = toscca.tStat(cancor, A, B, C = nuisanceVar, type = testStatType)[["tStatistic"]]
   h =  hist(perm[, getWhich(testStatistic, max)], breaks = draws/2, plot = FALSE)
 
-    permDensity = density(perm[, getWhich(testStatistic, max)])
+  permDensity = density(perm[, getWhich(testStatistic, max)])
 
-    xlim = c(min(min(perm) - margin, testStatistic - margin), max(max(perm) + margin, testStatistic + margin))
-    ylim = c(min((modes(permDensity)$y), min(perm[,getWhich(testStatistic, max)])), max((modes(permDensity)$y) + margin, max(h$counts) + margin))
+  xlim = c(min(min(perm) - margin, testStatistic - margin), max(max(perm) + margin, testStatistic + margin))
+  ylim = c(min((modes(permDensity)$y), min(perm[,getWhich(testStatistic, max)])), max((modes(permDensity)$y) + margin, max(h$counts) + margin))
 
 
-    oldpar <- par(no.readonly = TRUE)
-    on.exit({
-      try(par(oldpar), silent = TRUE)
-    })
+  oldpar <- par(no.readonly = TRUE)
+  on.exit({
+    try(par(oldpar), silent = TRUE)
+  })
 
-    par(mfrow=c(1,1))
-    hist(perm[, getWhich(testStatistic, max)], breaks = draws/2, xlab = "Canonical Correlation",
-         xlim = xlim, ylim =  ylim, main = paste0("Distribution under de Null - ", testStatType, " Statistic") , col =  scales::alpha("#01768c", 0.2))
-    lines(permDensity, col="black", lwd = 2)
-    epdfPlot(perm[,getWhich(testStatistic, max)], discrete = FALSE, density.arg.list = NULL, plot.it = TRUE,
-             add = TRUE, epdf.col = mpalette[5], epdf.lwd = 3 * par("cex"), epdf.lty = 1,
-             curve.fill = FALSE, curve.fill.col = mpalette[5], main = NULL, xlab = NULL, ylab = NULL)
-    abline(v=testStatistic, col = mpalette[2], lwd = 2)
-    legend("topleft", c("Empirical pdf", "density", "model canCor"), col = c(mpalette[5], "black", mpalette[9]), lty=c(2, 1, 1), cex=0.8)
-    text(x = as.character(testStatistic), y = 0.9*par('usr')[4], labels = as.character(1:K), cex = 0.9)
+  par(mfrow=c(1,1))
+  hist(perm[, getWhich(testStatistic, max)], breaks = draws/2, xlab = "Canonical Correlation",
+       xlim = xlim, ylim =  ylim, main = paste0("Distribution under de Null - ", testStatType, " Statistic") , col =  scales::alpha("#01768c", 0.2))
+  lines(permDensity, col="black", lwd = 2)
+  epdfPlot(perm[,getWhich(testStatistic, max)], discrete = FALSE, density.arg.list = NULL, plot.it = TRUE,
+           add = TRUE, epdf.col = mpalette[5], epdf.lwd = 3 * par("cex"), epdf.lty = 1,
+           curve.fill = FALSE, curve.fill.col = mpalette[5], main = NULL, xlab = NULL, ylab = NULL)
+  abline(v=testStatistic, col = mpalette[2], lwd = 2)
+  legend("topleft", c("Empirical pdf", "density", "model canCor"), col = c(mpalette[5], "black", mpalette[9]), lty=c(2, 1, 1), cex=0.8)
+  text(x = as.character(testStatistic), y = 0.9*par('usr')[4], labels = as.character(1:K), cex = 0.9)
 
 
   pValues = sapply(1:K, function (k) round(mean(testStatistic[k]<=(perm[, getWhich(testStatistic, max)])), 6))
@@ -832,6 +880,11 @@ toscca.lv <- function(data, alpha, beta) {
 tosccamm.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol = 10^(-6), silent = FALSE, model = c("arima", "lme"), arformula = c(1,0,0), lmeformula = " ~ -1 + time + (1|id)", predictor = NULL)
 {
 
+  scale_nonzero <- function(x) {
+    nz <- x != 0
+    x[nz] <- scale(x[nz], center = FALSE)
+    return(x)
+  }
 
 
   # checks
@@ -946,6 +999,8 @@ tosccamm.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol =
     dist = sqrt(colSums(beta^2))
     beta = sweep(beta, 2, dist, "/")
 
+    beta <- apply(beta, 2, scale_nonzero)
+
     zeta = B %*% beta
     # dist = sqrt(colSums(zeta^2))
     # zeta = sweep(zeta, 2, dist, "/")
@@ -1000,6 +1055,8 @@ tosccamm.core = function(alphaInit, A, B, nonzero_a, nonzero_b, iter = 20, tol =
       tmp[tmp<=0] = 0
       sign(y) * tmp
     })
+
+    alpha <- apply(alpha, 2, scale_nonzero)
 
 
     if(length(nonzero_a) == 1) e = mean(abs(gamma - varTol1)) + mean(abs(zeta - varTol2))
@@ -1234,7 +1291,7 @@ tosccamm = function(A, B, nonzero_a, nonzero_b, folds = 1, parallel_logic = FALS
   for (f in 1:folds) {
     s = rep(1, length(unique(A$id)))
     s[sample(1:length(unique(A$id)), 0.25*length(unique(A$id)))] = 2
-    fold_ids <- unique(A$id)[s == f]
+    fold_ids <- unique(A$id)[s == 1]
     ATrain = A[A$id %in% fold_ids, ]
     BTrain = B[B$id %in% fold_ids, ]
     if(!is.null(ATest_res)) ATest = ATest_res[!(A$id %in% fold_ids), ]
@@ -1293,15 +1350,15 @@ tosccamm = function(A, B, nonzero_a, nonzero_b, folds = 1, parallel_logic = FALS
     l = sapply(tv, function(v) length(intersect(ATest[ATest$time ==
                                                         v, ]$id, BTest[BTest$time == v, ]$id)))
     v = which(l == max(l))[1]
-    iv = intersect(ATest[ATest$time == tv[v], ]$id, BTest[BTest$time ==
-                                                            tv[v], ]$id)
+    iv = unique(intersect(ATest[ATest$time == tv[v], ]$id, BTest[BTest$time == tv[v], ]$id))
     g = data.frame(id = ATest$id, time = ATest$time, as.matrix(ATest[,
                                                                      -c(1, 2)]) %*% alphaMat[[f]])
+    g = g[g$id %in% iv, ]
     e = data.frame(id = BTest$id, time = BTest$time, as.matrix(BTest[,
                                                                      -c(1, 2)]) %*% betaMat[[f]])
-    m = sapply(1:ncol(alphaMat[[f]]), function(x) abs(cor(g[g$id %in%
-                                                              iv & g$time == tv[v], x + 2], e[e$id %in% iv & e$time ==
-                                                                                                tv[v], x + 2])))
+    e = e[e$id %in% iv, ]
+    m = sapply(1:ncol(alphaMat[[f]]), function(x) abs(cor(g[g$time == tv[v], x + 2], e[e$time ==
+                                                                                         tv[v], x + 2])))
 
     if(ncol(gamma_a) + ncol(zeta_a) > 2) canCor_a[f,]  = abs(sapply(2:ncol(gamma_a), function(j) cor(gamma_a[,j], zeta_a[,j])))
     if(ncol(gamma_a) + ncol(zeta_a) == 2) canCor_a[f,] = abs(cor(gamma_a, zeta_a))
@@ -1316,7 +1373,7 @@ tosccamm = function(A, B, nonzero_a, nonzero_b, folds = 1, parallel_logic = FALS
   }
 
   canCorKMeans = colSums(abs(canCor))/folds
-  select       = getWhich(abs(canCorKMeans), max)
+  select       = sort(getWhich(abs(canCorKMeans), max))[1]
   canCorPrint  = canCorKMeans[select]
 
   names(canCorPrint) <- ("k-fold cv max. cancor")
@@ -1329,17 +1386,23 @@ tosccamm = function(A, B, nonzero_a, nonzero_b, folds = 1, parallel_logic = FALS
                "\n ........................................ \n"))
   }
 
-  if(nrow(nonzeroGrid) > 1) {
+  if(h > 1) {
     mat = matrix(canCorKMeans, nrow = length(nonzero_a), byrow = FALSE)
     # mat = matrix(canCorKMeans, nrow = length(nonzero_a), ncol = length(nonzero_b))
     rownames(mat) = nonzero_a
     colnames(mat) = nonzero_b
-    myHeatmap(mat)
+    plt_heatmap = myHeatmap(mat)
+
 
   }
 
   result     = tosccamm.core(alphaInit =  runif(ncol(A)-2), A = A, B = B, nonzero_a = nonzeroGrid[select, 1], nonzero_b = nonzeroGrid[select, 2], silent = TRUE,  model = model, arformula = arformula, lmeformula = lmeformula, predictor = predictor)
 
+  # amat <- scale(resultKFold$a, center = FALSE)
+  # amat[resultKFold$a == 0] <- 0
+  #
+  # bmat <- scale(resultKFold$b, center = FALSE)
+  # bmat[resultKFold$b == 0] <- 0
 
   if(toPlot & isFALSE(parallel_logic)) {
     oldpar <- par(no.readonly = TRUE)
@@ -1347,27 +1410,28 @@ tosccamm = function(A, B, nonzero_a, nonzero_b, folds = 1, parallel_logic = FALS
       try(par(oldpar), silent = TRUE)
     })
 
-    par(mfrow = c(2, 2))
+    par(mfrow = c(2, 2), mai = c(0.65,0.8, 0.2, 0.2), oma = c(0.1, 0.7, 0, 0))
 
     col = alpha(colorRampPalette(mpalette[-1])(ncol(matrix(resultKFold$a, nrow = p))), 0.6)
 
-
-    matplot(matrix(resultKFold$a, nrow = p), pch = 19, ylab = expression(w^(1)), xlab = expression(p^(1)), col = col)
+    order_a = as.numeric(rownames(nonzeroGrid[order(nonzeroGrid[,1], decreasing = TRUE),]))
+    matplot(matrix(resultKFold$a[,order_a], nrow = p), pch = 19, ylab = expression(w^(1)), xlab = expression(p^(1)), col = col)
     title("Full set")
 
-    matplot(resultKFold$a[,select], pch = 19, ylab = expression(w^(1)), xlab = expression(p^(1)), col = col[select])
+    matplot(resultKFold$a[,select], pch = 19, ylab = expression(w^(1)), xlab = expression(p^(1)), col =  alpha("black", 0.6))
     title("K-fold CV best")
 
+    # order_b = unique(sort(1:nrow(nonzeroGrid)[nonzeroGrid[,2]]))
     matplot(matrix(resultKFold$b, nrow = q), pch = 19, ylab = expression(w^(2)), xlab = expression(p^(2)), col = col)
-    matplot(resultKFold$b[,select], pch = 19, ylab = expression(w^(2)), xlab = expression(p^(2)), col = col[select])
+    matplot(resultKFold$b[,select], pch = 19, ylab = expression(w^(2)), xlab = expression(p^(2)), col =  alpha("black", 0.6))
 
-
+    plt_cw <- recordPlot()
 
   }
 
 
 
-  if(nrow(nonzeroGrid) > 1) {
+  if(h>1) {
     resultSCCA = list(cancor = canCorPrint,
                       alpha  = result$a,
                       beta   = result$b,
@@ -1376,6 +1440,8 @@ tosccamm = function(A, B, nonzero_a, nonzero_b, folds = 1, parallel_logic = FALS
                       # alphaMat       = alphaMat,
                       # betaMat        = betaMat,
                       # position       = select,
+                      plt_cw = plt_cw,
+                      plt_heatmap = plt_heatmap,
                       nonzero_a = nonzeroGrid[select, 1],
                       nonzero_b = nonzeroGrid[select, 2],
                       canCor_grid = mat)
@@ -1495,7 +1561,7 @@ tosccamm = function(A, B, nonzero_a, nonzero_b, folds = 1, parallel_logic = FALS
 
 toscamm.perm = function (A, B, nonzero_a, nonzero_b, K=1, folds = 1, toPlot = FALSE, draws = 1000,
                          cancor, bootCCA = NULL, silent = TRUE, parallel_logic = TRUE,
-                         nuisanceVar = 0, testStatType = "CC", model = "lme", lmeformula = " ~ 0 + poly(time,3) + (1|id)", arformula = NULL, ncores = NULL)
+                         nuisanceVar = 0, testStatType = "CC", model = "lme", lmeformula = " ~ 0 + poly(time,3) + (1|id)", predictor = NULL, arformula = NULL, ncores = NULL)
 {
   histNullCCA <- modelCanCor <- x <- y <- `..count..` <- NULL
 
@@ -1508,6 +1574,7 @@ toscamm.perm = function (A, B, nonzero_a, nonzero_b, K=1, folds = 1, toPlot = FA
       stop("DoPar not registered. Check cores")
     perm <- foreach::foreach(d = 1:draws, .combine = "rbind", .export = ls(globalenv())) %dopar%
       {
+        library(scales)
         res_perm = list()
         ASample = data.frame(A[,1:2], A[sample(1:nrow(A), nrow(A)), -c(1,2)])
         X.temp = ASample
@@ -1524,8 +1591,8 @@ toscamm.perm = function (A, B, nonzero_a, nonzero_b, K=1, folds = 1, toPlot = FA
           }
 
           res_perm[[k]] <- tosccamm(X.temp, Y.temp, folds = 2,
-                                    nonzero_a[k], nonzero_b[k],
-                                    model = model, lmeformula = lmeformula)
+                                    nonzero_a[k], nonzero_b[k], predictor = predictor,
+                                    model = model, lmeformula = lmeformula, toPlot = toPlot, silent = silent)
 
           #  for (s in unique(X.temp$time)) {
           #    w = unique(intersect(X.temp[X.temp$time==s,]$id, Y.temp[Y.temp$time==s,]$id))

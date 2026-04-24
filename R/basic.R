@@ -430,118 +430,123 @@ myHeatmap <- function(mat, palette_values = mpalette, blue = NULL, xlab = "", yl
 #' }
 #' @export
 plt.selstab = function (object, X, Y, nonz_x, nonz_y, palette_values = mpalette, blue = TRUE, k=1)
-  {
-    index <- count <- NULL
-    if(is.null(nonz_x) & is.null(nonz_y)) {
-      if(!is.null(object$alpha)) mat = object$canCor_grid
-      if(is.null(object$alpha)) mat = object[[k]]$canCor_grid
+{
+  index <- count <- NULL
+  if(is.null(nonz_x) & is.null(nonz_y)) {
+    if(!is.null(object$alpha)) mat = object$canCor_grid
+    if(is.null(object$alpha)) mat = object[[k]]$canCor_grid
 
-      nonz_x = sort(as.numeric(rownames(mat)))
-      nonz_y = sort(as.numeric(colnames(mat)))
+    nonz_x = sort(as.numeric(rownames(mat)))
+    nonz_y = sort(as.numeric(colnames(mat)))
 
-      if(is.null(mat)) stop("Provide sparsity levels for stability selection plots.")
-    }
-    type = object$type
+    if(is.null(mat)) stop("Provide sparsity levels for stability selection plots.")
+  }
+  type = object$type
 
-    if(type == 2){
-      run_cca <- function(i) {
-        cca_res = toscca(
-          X, Y,
-          nonzero_a = nonz_x[i],
-          nonzero_b = nonz_y[1],
-          silent = TRUE, type =2
-        )
-        list(alpha = cca_res$alpha[, 1], beta = cca_res$beta[, 1], cancor = cca_res$cancor[1])
-      }
-
-    } else {
-      run_cca <- function(i) {
-        cca_res = toscca(
-          X, Y, type = 1,
-          nonz_x[i],
-          nonz_y[1], K = 1, "uniform",
-          combination = FALSE, silent = TRUE, toPlot = FALSE)
-        list(alpha = cca_res$alpha[, 1], beta = cca_res$beta[, 1], cancor = cca_res$cancor[1])
-      }
-
-    }
-    results <- sapply(seq_along(nonz_x), run_cca, simplify = FALSE)
-    # results <- mclapply(seq_along(nonz_x), run_cca, mc.cores = detectCores() - 1)
-
-    alpha <- do.call(cbind, lapply(results, `[[`, "alpha"))
-    beta <- do.call(cbind, lapply(results, `[[`, "beta"))
-    cancor <- unlist(lapply(results, `[[`, "cancor"))
-
-    # Convert matrix to binary
-    numToBi <- function(data) {
-      1L*(data != 0)
+  if(type == 2){
+    run_cca <- function(i) {
+      cca_res = toscca(
+        X, Y,
+        nonzero_a = nonz_x[i],
+        nonzero_b = nonz_y[1],
+        silent = TRUE, type =2, toPlot = FALSE,
+      )
+      list(alpha = cca_res$alpha[, 1], beta = cca_res$beta[, 1], cancor = cca_res$cancor[1])
     }
 
-    count_alpha_df = as.data.frame(numToBi(alpha))
-    colnames(count_alpha_df) <- as.character(nonz_x)
-    count_alpha_df$count <- rowSums(count_alpha_df)
+  } else {
+    run_cca <- function(i) {
+      cca_res = toscca(
+        X, Y, type = 1,
+        nonz_x[i],
+        nonz_y[1], K = 1, "uniform",
+        combination = FALSE, silent = TRUE, toPlot = FALSE)
+      list(alpha = cca_res$alpha[, 1], beta = cca_res$beta[, 1], cancor = cca_res$cancor[1])
+    }
+
+  }
+  results <- sapply(seq_along(nonz_x), run_cca, simplify = FALSE)
+  # results <- mclapply(seq_along(nonz_x), run_cca, mc.cores = detectCores() - 1)
+
+  alpha <- do.call(cbind, lapply(results, `[[`, "alpha"))
+  beta <- do.call(cbind, lapply(results, `[[`, "beta"))
+  cancor <- unlist(lapply(results, `[[`, "cancor"))
+
+  # Convert matrix to binary
+  numToBi <- function(data) {
+    1L*(data != 0)
+  }
+
+  count_alpha_df = as.data.frame(numToBi(alpha))
+  colnames(count_alpha_df) <- as.character(nonz_x)
+  count_alpha_df$count <- rowSums(count_alpha_df)
 
 
-    palette_colors <- palette_values # viridis::viridis(8, option = palette)
-    col_a <- palette_colors[pmin(count_alpha_df$count, 8)]
-    col_a[is.na(col_a)] <- "black"
+  palette_colors <- palette_values # viridis::viridis(8, option = palette)
+  col_a <- palette_colors[pmin(count_alpha_df$count, 8)]
+  col_a[is.na(col_a)] <- "black"
 
-    alpha_points = alpha[, ncol(alpha)]
-    alpha_points[alpha_points!=0] = scale(alpha_points[alpha_points!=0], center = T)
+  alpha_points = alpha[, ncol(alpha)]
+  # alpha_points[alpha_points!=0] = scale(alpha_points[alpha_points!=0], center = F)
+  # alpha_points[alpha_points!=0] = scale(alpha_points[alpha_points!=0], scale =F)
 
-    plot_data <- data.frame(
-      index = 1:nrow(alpha),
-      coefficients =alpha_points,
-      count = count_alpha_df$count
+  # cent = mean(alpha_points)
+  # dist = sqrt(sum((alpha_points- cent)^2)/max(1, length(alpha_points - 1)))
+  # alpha_points = alpha_points/dist
+  plot_data <- data.frame(
+    index = 1:nrow(alpha),
+    coefficients =alpha_points,
+    count = count_alpha_df$count
+  )
+
+  # plt = ggplot(plot_data, aes(x = index, y = coefficients, color = factor(count))) +
+  #   geom_point(size = 3, alpha = 0.99) +  # Larger points with transparency
+  #   scale_color_viridis_d(option = palette, name = "selection count", direction = -1) +
+  #   labs(
+  #     title = "",
+  #     x = "feature index (p)",
+  #     y = "coefficient"
+  #   ) +
+  #   theme_minimal(base_size = 14) +
+  #   theme(
+  #     legend.position = "right",
+  #     panel.grid.major = element_line(color = "gray80", linetype = "dashed"),
+  #     panel.grid.minor = element_blank()
+  #   ) + ggtitle("cc w.r.t. sparsity levels") + theme(plot.title = element_text(size = 16, face = "bold", color = "black",
+  #                                                                           hjust = 0.5, vjust = 1.5,
+  #                                                                           lineheight = 1.2))
+
+  n_colors <- length(unique(plot_data$count))
+  bor = 1:length(palette_values)
+  if(isTRUE(blue)) bor = (length(palette_values)/2):1
+  if(isFALSE(blue)) bor = (length(palette_values)/2):(length(palette_values))
+  custom_colors <- grDevices::colorRampPalette(palette_values[bor])(n_colors) # viridis::viridis(n_colors + 1, option = palette)[-1]
+
+  plt = ggplot2::ggplot(plot_data, ggplot2::aes(x = index, y = coefficients, color = factor(count))) +
+    ggplot2::geom_point(ggplot2::aes(alpha = factor(count)), size = 3) +
+    # scale_color_viridis_d(option = palette, name = "Selection Count", direction = -1) +
+    ggplot2::scale_color_manual(values = custom_colors, name = "Selection Count") +
+    ggplot2::scale_alpha_manual(values = scales::rescale(as.numeric(levels(factor(plot_data$count))), to = c(0.1, 1)), guide = "none") +
+    ggplot2::labs(
+      title = "",
+      x = "Feature index (p)",
+      y = "Coefficient"
+    ) +
+    ggplot2::theme_minimal(base_size = 14) +
+    ggplot2::theme(
+      legend.position = "right",
+      panel.grid.major = ggplot2::element_line(color = "gray80", linetype = "dashed"),
+      panel.grid.minor = ggplot2::element_blank()
+    ) +
+    ggplot2::ggtitle("Selection stability for canonical vectors") +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(size = 16, face = "bold", color = "black",
+                                         hjust = 0.5, vjust = 1.5, lineheight = 1.2)
     )
 
-    # plt = ggplot(plot_data, aes(x = index, y = coefficients, color = factor(count))) +
-    #   geom_point(size = 3, alpha = 0.99) +  # Larger points with transparency
-    #   scale_color_viridis_d(option = palette, name = "selection count", direction = -1) +
-    #   labs(
-    #     title = "",
-    #     x = "feature index (p)",
-    #     y = "coefficient"
-    #   ) +
-    #   theme_minimal(base_size = 14) +
-    #   theme(
-    #     legend.position = "right",
-    #     panel.grid.major = element_line(color = "gray80", linetype = "dashed"),
-    #     panel.grid.minor = element_blank()
-    #   ) + ggtitle("cc w.r.t. sparsity levels") + theme(plot.title = element_text(size = 16, face = "bold", color = "black",
-    #                                                                           hjust = 0.5, vjust = 1.5,
-    #                                                                           lineheight = 1.2))
+  return(plt)
+}
 
-    n_colors <- length(unique(plot_data$count))
-    bor = 1:length(palette_values)
-    if(isTRUE(blue)) bor = (length(palette_values)/2):1
-    if(isFALSE(blue)) bor = (length(palette_values)/2):(length(palette_values))
-    custom_colors <- grDevices::colorRampPalette(palette_values[bor])(n_colors) # viridis::viridis(n_colors + 1, option = palette)[-1]
-
-    plt = ggplot2::ggplot(plot_data, ggplot2::aes(x = index, y = coefficients, color = factor(count))) +
-      ggplot2::geom_point(ggplot2::aes(alpha = factor(count)), size = 3) +
-      # scale_color_viridis_d(option = palette, name = "Selection Count", direction = -1) +
-      ggplot2::scale_color_manual(values = custom_colors, name = "Selection Count") +
-      ggplot2::scale_alpha_manual(values = scales::rescale(as.numeric(levels(factor(plot_data$count))), to = c(0.1, 1)), guide = "none") +
-      ggplot2::labs(
-        title = "",
-        x = "Feature index (p)",
-        y = "Coefficient"
-      ) +
-      ggplot2::theme_minimal(base_size = 14) +
-      ggplot2::theme(
-        legend.position = "right",
-        panel.grid.major = ggplot2::element_line(color = "gray80", linetype = "dashed"),
-        panel.grid.minor = ggplot2::element_blank()
-      ) +
-      ggplot2::ggtitle("Selection stability for canonical vectors") +
-      ggplot2::theme(
-        plot.title = ggplot2::element_text(size = 16, face = "bold", color = "black",
-                                           hjust = 0.5, vjust = 1.5, lineheight = 1.2)
-      )
-
-    return(plt)
-  }
 
 
 # get which function ------------------------------------------------------
